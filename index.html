@@ -3,40 +3,88 @@
    - file, You can obtain one at https://mozilla.org/MPL/2.0/. -->
 
 <!doctype html>
-<html>
+<html lang="pt-BR">
   <head>
-    <title>Bookbinder</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://unpkg.com/balloon-css/balloon.min.css" />
-    <link rel="stylesheet" type="text/css" href="./styles.css" />
-    <link rel="stylesheet" href="./matcha.css" />
-    <script type="module" src="/src/main.js"></script>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Imposição de páginas para encadernação: envie um PDF e baixe as folhas prontas para imprimir, dobrar e costurar."
+    />
+    <title>Bookbinder</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <script type="module" src="/src/main.js"></script>
   </head>
 
-  <body>
-    <div class="wrapper">
-      <div class="section" id="intro">
-        <h1>Bookbinder JS</h1>
-        A Javascript-based app for formatting PDFs for bookbinding-- a process called imposition.
-        For more information, feature requests, or to contribute, view the project's
-        <a href="https://github.com/momijizukamori/bookbinder-js">Github repository</a>.
-        <center style="font-family: monospace; padding-top: 0.75em; font-variant-caps: small-caps">
-          current version: %PACKAGE_VERSION%
-        </center>
+  <body data-state="empty">
+    <header class="topbar">
+      <a class="brand" href="./">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 5.5c3-1 6-1 9 .5 3-1.5 6-1.5 9-.5V19c-3-1-6-1-9 .5-3-1.5-6-1.5-9-.5z" />
+          <path d="M12 6v13.5" />
+        </svg>
+        <span>Bookbinder</span>
+      </a>
+      <span class="tagline" data-i18n="tagline">Imposição de páginas para encadernação</span>
+      <div class="topbar-end">
+        <span class="privacy">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+          </svg>
+          <span data-i18n="privacy_note">Seu PDF não sai do seu computador</span>
+        </span>
+        <div class="lang-switcher" role="group" data-i18n-tooltip="lang_label" aria-label="Idioma">
+          <button type="button" id="btn-lang-pt" onclick="window.setLanguage('pt')">PT</button>
+          <button type="button" id="btn-lang-en" onclick="window.setLanguage('en')">EN</button>
+        </div>
       </div>
-      <form id="bookbinder" name="bookbinder">
-        <load src="src/html/file.html" />
-        <load src="src/html/source_manip.html" />
+    </header>
+
+    <form id="bookbinder" name="bookbinder" class="app">
+      <main class="stage">
+        <load src="src/html/stage.html" />
+      </main>
+
+      <aside class="inspector" data-i18n-tooltip="settings_label" aria-label="Configurações">
+        <load src="src/html/sig_format.html" />
         <load src="src/html/printer.html" />
         <load src="src/html/page_layout.html" />
+        <load src="src/html/file.html" />
+        <load src="src/html/source_manip.html" />
         <load src="src/html/crop_box.html" />
-        <load src="src/html/sig_format.html" />
-        <load src="src/html/flyleaf.html" />
-        <load src="src/html/preview.html" />
-        <load src="src/html/buttons.html" />
-      </form>
-    </div>
+        <load src="src/html/wacky.html" />
+
+        <footer class="inspector-footer">
+          <button
+            type="button"
+            name="reset_settings"
+            id="reset_settings"
+            class="link-btn"
+            data-i18n-title="btn_reset_tooltip"
+          >
+            <span data-i18n="btn_reset">Restaurar padrões</span>
+          </button>
+          <span class="version">
+            <span>v%PACKAGE_VERSION%</span>
+            <a
+              href="https://github.com/momijizukamori/bookbinder-js"
+              target="_blank"
+              rel="noopener"
+              data-i18n="intro_repo_link"
+              >GitHub</a
+            >
+          </span>
+        </footer>
+      </aside>
+    </form>
   </body>
 </html>

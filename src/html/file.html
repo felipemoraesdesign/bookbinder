@@ -1,26 +1,45 @@
-<section class="section" id="input">
-  <header><h2>File Info</h2></header>
-  <label
-    >Input File: <input type="file" name="input_file" accept=".pdf" id="input_file" class="inline"
-  /></label>
-  <!-- <span class="row"><label>Page Size: <span id="page_size"></span></span> -->
-  <!-- <span class="row">Page Ratio: <span id="input_ratio"></span></span> -->
-  <p class="flash variant">
-    While some PDF viewers display the first two pages as a spread, be aware the first page, which
-    is odd, will be on the right when printed. The first printed spread are pages 2 & 3 of your PDF
-    document. Evens always on the left, odds always on the right.
-  </p>
-  <label for="print_file"
-    >Generated Files:
-    <select name="print_file" id="print_file" class="inline">
-      <option value="aggregated">Aggregated File Only</option>
-      <option value="both" selected>Both aggregated & per signature files</option>
-      <option value="signatures">Signature Files Only</option>
-    </select>
-  </label>
-  <label
-    >Page Range:
-    <input type="text" name="page_range" id="page_range" class="inline" placeholder="All pages" />
-  </label>
-  <small>Optional. Examples: <code>1-8</code>, <code>1,3,5-7</code>.</small>
-</section>
+<details class="panel">
+  <summary><span data-i18n="file_info_title">Páginas e arquivos</span></summary>
+  <div class="panel-body">
+    <label class="field" for="page_range">
+      <span class="field-label" data-i18n="page_range">Intervalo de páginas</span>
+      <input
+        type="text"
+        name="page_range"
+        id="page_range"
+        data-i18n-placeholder="page_range_placeholder"
+        placeholder="Todas as páginas"
+        aria-describedby="page_range_help"
+      />
+      <small class="hint" id="page_range_help" data-i18n="page_range_help"
+        >Opcional. Ex.: 1-8 ou 1,3,5-7.</small
+      >
+    </label>
+
+    <label class="field">
+      <span class="field-label" data-i18n="add_flyleafs">Folhas de guarda</span>
+      <span class="field-unit">
+        <input type="number" name="flyleafs" value="1" min="0" aria-describedby="flyleafs_help" />
+        <span data-i18n="sheets_unit">folhas</span>
+      </span>
+      <small class="hint" id="flyleafs_help" data-i18n="flyleafs_tooltip"
+        >Páginas em branco no começo e no fim.</small
+      >
+    </label>
+
+    <label class="field" for="print_file">
+      <span class="field-label" data-i18n="generated_files">O que vem no .zip</span>
+      <select name="print_file" id="print_file">
+        <option value="aggregated" data-i18n="gen_aggregated">Só o arquivo completo</option>
+        <option value="both" selected data-i18n="gen_both">
+          Arquivo completo + um por caderno
+        </option>
+        <option value="signatures" data-i18n="gen_signatures">Só os arquivos por caderno</option>
+      </select>
+    </label>
+
+    <p class="callout" data-i18n="file_warning">
+      The first page, which is odd, will be on the right when printed.
+    </p>
+  </div>
+</details>

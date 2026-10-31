@@ -498,10 +498,8 @@ export class Book {
     viewerPrefs.setDisplayDocTitle(true);
 
     previewFrame.src = pdfDataUri;
-    previewFrame.style.width = `450px`;
-    const height = (this.papersize[1] / this.papersize[0]) * 500;
-    previewFrame.style.height = `${height}px`;
     previewFrame.style.display = '';
+    previewFrame.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /**

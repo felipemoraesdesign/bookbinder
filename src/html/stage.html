@@ -1,0 +1,166 @@
+<label class="dropzone" id="dropzone">
+  <input type="file" name="input_file" accept=".pdf,application/pdf" id="input_file" />
+
+  <span class="dropzone-empty">
+    <svg class="dropzone-art" viewBox="0 0 220 180" aria-hidden="true">
+      <rect class="art-sheet-shadow" x="44" y="22" width="140" height="150" rx="3" />
+      <rect class="art-sheet" x="38" y="14" width="140" height="150" rx="3" />
+      <g class="art-page">
+        <rect x="46" y="22" width="58" height="63" rx="1.5" />
+        <rect x="112" y="22" width="58" height="63" rx="1.5" />
+        <rect x="46" y="93" width="58" height="63" rx="1.5" />
+        <rect x="112" y="93" width="58" height="63" rx="1.5" />
+      </g>
+      <g class="art-num">
+        <text x="75" y="48" transform="rotate(180 75 48)">5</text>
+        <text x="141" y="48" transform="rotate(180 141 48)">4</text>
+        <text x="75" y="132">8</text>
+        <text x="141" y="132">1</text>
+      </g>
+      <path class="art-fold" d="M108 8v162M30 89h156" />
+    </svg>
+    <strong class="dropzone-title" data-i18n="drop_title">Solte seu PDF aqui</strong>
+    <span class="dropzone-sub" data-i18n="drop_sub"
+      >Escolha o formato no painel ao lado e baixe a imposição pronta para imprimir.</span
+    >
+    <span class="btn btn-secondary" aria-hidden="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 16V4m0 0L7 9m5-5 5 5M5 20h14" />
+      </svg>
+      <span data-i18n="drop_button">Escolher PDF</span>
+    </span>
+    <span class="dropzone-error" id="file_error" role="alert"></span>
+    <span class="dropzone-setup" id="setup_summary"></span>
+  </span>
+
+  <span class="dropzone-file">
+    <svg class="file-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z" />
+      <path d="M14 3v5h5" />
+    </svg>
+    <span class="file-text">
+      <strong id="file_name"></strong>
+      <span id="file_meta"></span>
+    </span>
+    <span class="file-change" data-i18n="file_change">Trocar arquivo</span>
+  </span>
+</label>
+
+<div class="results">
+  <section class="summary" aria-labelledby="summary_title">
+    <h2 class="section-title" id="summary_title" data-i18n="summary_title">
+      Seu livro em cadernos
+    </h2>
+    <figure class="bookblock">
+      <div class="bookblock-row" id="sig_visual" aria-hidden="true"></div>
+      <figcaption>
+        <span data-i18n="sig_arrangement">Folhas em cada caderno</span>
+        <span id="sig_arrange"></span>
+      </figcaption>
+    </figure>
+    <dl class="stats" aria-live="polite">
+      <div>
+        <dt data-i18n="total_sheets">Folhas</dt>
+        <dd id="total_sheets"></dd>
+      </div>
+      <div>
+        <dt data-i18n="num_signatures">Cadernos</dt>
+        <dd id="sig_count"></dd>
+      </div>
+      <div>
+        <dt data-i18n="total_pages">Páginas impressas</dt>
+        <dd id="total_pages"></dd>
+      </div>
+      <div>
+        <dt data-i18n="processed_pages">Páginas do PDF</dt>
+        <dd id="page_count"></dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="sheet-view" aria-labelledby="sheet_view_title">
+    <h2 class="section-title" id="sheet_view_title" data-i18n="sheet_view_title">
+      Página na folha
+    </h2>
+    <div class="sheet-layout" id="show_layout_info">
+      <div class="sheet-figure">
+        <div class="layout_spine_label" data-i18n="spine">lombada</div>
+        <div class="stripes_paper" id="grid_layout_preview">
+          <div class="stripes_pdf" id="pdf_on_page_layout_preview"></div>
+        </div>
+      </div>
+      <dl class="sheet-legend" id="layout_margin_info">
+        <div>
+          <dt><i class="swatch swatch-paper"></i><span data-i18n="layout">Grade da folha</span></dt>
+          <dd id="page_grid_layout"></dd>
+        </div>
+        <div>
+          <dt>
+            <i class="swatch swatch-paper"></i
+            ><span data-i18n="max_page_size">Espaço por página</span>
+          </dt>
+          <dd id="page_grid_dimensions"></dd>
+        </div>
+        <div>
+          <dt><i class="swatch swatch-pdf"></i><span data-i18n="source">PDF original</span></dt>
+          <dd id="pdf_source_dimensions"></dd>
+        </div>
+        <div>
+          <dt><i class="swatch swatch-pdf"></i><span data-i18n="on_page">Na folha</span></dt>
+          <dd id="pdf_page_dimensions"></dd>
+        </div>
+        <div>
+          <dt data-i18n="scaling">Escala</dt>
+          <dd id="pdf_scale_dimensions"></dd>
+        </div>
+        <div>
+          <dt data-i18n="rotated">Rotacionada</dt>
+          <dd id="pdf_page_rotation_info"></dd>
+        </div>
+        <div class="span-2">
+          <dt data-i18n="offset">Deslocamento</dt>
+          <dd id="pdf_offset_dimensions"></dd>
+        </div>
+        <p class="span-2 muted" data-i18n="all_dims_pts">Medidas em pontos (1 pt = 1/72 pol.)</p>
+      </dl>
+    </div>
+  </section>
+
+  <iframe
+    id="pdf"
+    title="Pré-visualização"
+    data-i18n-title="preview_frame_title"
+    style="display: none"
+  ></iframe>
+</div>
+
+<div class="actionbar">
+  <p class="actionbar-note" id="action_note" data-i18n="download_note" aria-live="polite">
+    Você recebe um .zip com o PDF pronto para imprimir.
+  </p>
+  <button
+    type="button"
+    name="preview"
+    id="preview"
+    class="btn btn-ghost"
+    disabled
+    data-i18n-title="btn_preview_tooltip"
+  >
+    <svg class="icon-idle" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+    <span class="spinner" aria-hidden="true"></span>
+    <span data-i18n="btn_preview">Pré-visualizar</span>
+  </button>
+  <button type="button" name="generate" id="generate" class="btn btn-primary" disabled>
+    <svg class="icon-idle" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 4v12m0 0-5-5m5 5 5-5M5 20h14" />
+    </svg>
+    <svg class="icon-done" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="m5 12.5 4.5 4.5L19 7.5" />
+    </svg>
+    <span class="spinner" aria-hidden="true"></span>
+    <span data-i18n="btn_generate">Baixar imposição</span>
+  </button>
+</div>

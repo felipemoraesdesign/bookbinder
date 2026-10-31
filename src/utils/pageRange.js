@@ -56,3 +56,25 @@ export function parsePageRange(pageRange, pageCount) {
 
   return Array.from(selectedPages).sort((a, b) => a - b);
 }
+
+/**
+ * Explains why a page range would fall back to the whole document, for inline feedback.
+ * Mirrors parsePageRange: an empty range is valid.
+ *
+ * @param {string | null | undefined} pageRange
+ * @param {number | undefined} pageCount known once a PDF is open
+ * @returns {null | 'syntax' | 'out_of_range'}
+ */
+export function pageRangeError(pageRange, pageCount) {
+  const tokens = (pageRange ?? '')
+    .split(',')
+    .map((token) => token.trim())
+    .filter(Boolean);
+  if (tokens.length === 0) return null;
+  if (!tokens.every((token) => /^\d+(\s*-\s*\d+)?$/.test(token))) return 'syntax';
+  const hitsAPage = tokens.some((token) => {
+    const [start, end = start] = token.split('-').map(Number);
+    return Math.min(start, end) <= pageCount && Math.max(start, end) >= 1;
+  });
+  return pageCount && !hitsAPage ? 'out_of_range' : null;
+}

@@ -4,11 +4,12 @@
 
 import { PAGE_SIZES } from '../constants';
 import { handleSewingMarksCheckboxState } from './clickHandlers.js';
+import { i18n } from '../i18n.js';
 
 export function renderPageCount(book) {
   const pageCount = document.getElementById('page_count');
   if (book.sourcePageCount && book.pagecount !== book.sourcePageCount) {
-    pageCount.innerText = `${book.pagecount} of ${book.sourcePageCount}`;
+    pageCount.innerText = `${book.pagecount} / ${book.sourcePageCount}`;
     return;
   }
 
@@ -32,6 +33,34 @@ export function renderInfoBox(book) {
   sigCount.innerText = book.book.sigconfig.length;
   sigArrange.innerText = book.book.sigconfig.join(', ');
   totalPages.innerText = outputPages;
+  renderSignatureBlock(document.getElementById('sig_visual'), book.book.sigconfig);
+}
+
+/**
+ * Draws each signature as its folded sheets nested inside one another, seen from the head of the book.
+ * @param {HTMLElement} container
+ * @param {number[]} sigconfig sheets per signature
+ */
+export function renderSignatureBlock(container, sigconfig) {
+  // redraw only when the arrangement changes, so unrelated settings don't replay the animation
+  const key = sigconfig.join(',');
+  if (container.dataset.config === key) return;
+  container.dataset.config = key;
+  const height = 56;
+  container.innerHTML = sigconfig
+    .map((sheets, i) => {
+      const width = 20 + Math.min(sheets, 14);
+      const step = Math.min(3, (height / 2 - 6) / sheets);
+      const paths = Array.from({ length: sheets }, (_, n) => {
+        const top = n * step + 1;
+        const bottom = height - n * step - 1;
+        const spine = n * step * 0.8 + 1;
+        const r = Math.min(8, (bottom - top) / 2);
+        return `<path d="M${width} ${top}H${spine + r}A${r} ${r} 0 0 0 ${spine} ${top + r}V${bottom - r}A${r} ${r} 0 0 0 ${spine + r} ${bottom}H${width}"/>`;
+      }).join('');
+      return `<svg class="sig" style="--i:${i}" width="${width}" viewBox="0 0 ${width} ${height}">${paths}</svg>`;
+    })
+    .join('');
 }
 
 /**
@@ -69,21 +98,24 @@ export function updatePageLayoutInfo(info) {
   displayDiv.style.margin = `${dims[1]}px ${dims[0]}px`;
 
   document.getElementById('page_grid_layout').innerText =
-    `${info.dimensions.layout.rows} rows x ${info.dimensions.layout.cols} cols`;
-  document.getElementById('page_grid_dimensions').innerText = `${paperDims[0]}, ${paperDims[1]}`;
+    `${info.dimensions.layout.rows} × ${info.dimensions.layout.cols}`;
+  document.getElementById('page_grid_dimensions').innerText =
+    `${paperDims[0].toFixed(1)} × ${paperDims[1].toFixed(1)}`;
   document.getElementById('pdf_source_dimensions').innerText =
-    `${info.cropbox.width}, ${info.cropbox.height}`;
+    `${info.cropbox.width} × ${info.cropbox.height}`;
   document.getElementById('pdf_page_dimensions').innerText =
-    `${pdfDims[0].toFixed(2)}, ${pdfDims[1].toFixed(2)}`;
-  document.getElementById('pdf_offset_dimensions').innerHTML = `
-  ${info.dimensions.xBindingShiftFunc().toFixed(2)} from spine <BR>
-  ${info.dimensions.yTopShiftFunc().toFixed(2)} from top <BR>
-  ${info.dimensions.xForeEdgeShiftFunc().toFixed(2)} from fore edge <BR>
-  ${info.dimensions.yBottomShiftFunc().toFixed(2)} from bottom
-  `;
+    `${pdfDims[0].toFixed(1)} × ${pdfDims[1].toFixed(1)}`;
+  document.getElementById('pdf_offset_dimensions').innerText = [
+    `${i18n.t('binding_margin')} ${info.dimensions.xBindingShiftFunc().toFixed(1)}`,
+    `${i18n.t('top_margin')} ${info.dimensions.yTopShiftFunc().toFixed(1)}`,
+    `${i18n.t('fore_edge_margin')} ${info.dimensions.xForeEdgeShiftFunc().toFixed(1)}`,
+    `${i18n.t('bottom_margin')} ${info.dimensions.yBottomShiftFunc().toFixed(1)}`,
+  ].join('\n');
   document.getElementById('pdf_scale_dimensions').innerText =
     `${info.dimensions.pdfScale[0].toFixed(2)}, ${info.dimensions.pdfScale[1].toFixed(2)}`;
-  document.getElementById('pdf_page_rotation_info').innerText = `${needsRotation}`;
+  document.getElementById('pdf_page_rotation_info').innerText = i18n.t(
+    needsRotation ? 'yes' : 'no'
+  );
 }
 /**
  * Expects a data object describing the overall page layout info:
@@ -237,13 +269,16 @@ export function renderFormFromSettings(configuration) {
 
   // Set select options
   document.querySelector('select[name="source_rotation"]').value = configuration.sourceRotation;
-  document.querySelector('select[name="pagelayout"]').value = configuration.pageLayout;
+  document.querySelector(`input[name="pagelayout"][value="${configuration.pageLayout}"]`).checked =
+    true;
   document.querySelector('select[name="page_scaling"]').value = configuration.pageScaling;
   document.querySelector('select[name="page_positioning"]').value = configuration.pagePositioning;
   document.querySelector('select[name="print_file"]').value = configuration.printFile;
   document.querySelector('select[name="paper_size"]').value = configuration.paperSize;
   document.querySelector('select[name="paper_size_unit"]').value = configuration.paperSizeUnit;
-  document.querySelector('select[name="printer_type"]').value = configuration.printerType;
+  document.querySelector(
+    `input[name="printer_type"][value="${configuration.printerType}"]`
+  ).checked = true;
 
   // Set options which are not always present
   if (

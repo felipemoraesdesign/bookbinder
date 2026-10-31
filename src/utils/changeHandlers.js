@@ -23,8 +23,13 @@ export function handleInputChange(book, bookbinderForm) {
 export function handleFileChange(e, book) {
   clearPreview();
   const fileList = e.target.files;
-  if (fileList.length > 0) {
-    const updated = book.openpdf(fileList[0]);
-    updated.then(() => updateRenderedForm(book));
-  }
+  if (fileList.length === 0) return Promise.resolve();
+  return book
+    .openpdf(fileList[0])
+    .then(() => updateRenderedForm(book))
+    .catch((error) => {
+      // openpdf sets the name before parsing; clear it so later setting changes don't render a broken doc
+      book.inputpdf = null;
+      throw error;
+    });
 }
