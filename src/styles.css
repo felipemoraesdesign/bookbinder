@@ -286,7 +286,6 @@ img {
 
 body[data-state='empty'] .dropzone {
   flex: 1;
-  margin-bottom: 28px;
   border: 1.5px dashed var(--line-strong);
   background: var(--surface);
   display: grid;
@@ -738,6 +737,31 @@ body:not([data-state='loaded']) .actionbar {
   background: var(--warn-bg);
   color: var(--warn-ink);
   animation: nudge 0.32s var(--ease-out);
+}
+
+/* ---------- Credit ---------- */
+
+.credit {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 0 20px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-3);
+  text-align: center;
+  text-wrap: balance;
+}
+
+.credit a {
+  color: var(--ink-2);
+  text-decoration-color: var(--line-strong);
+  border-radius: 2px;
+  transition: color var(--dur-micro) var(--ease);
+}
+
+.credit a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
 }
 
 /* ---------- Buttons ---------- */
@@ -1531,7 +1555,6 @@ select {
 
   body[data-state='empty'] .dropzone {
     min-height: 360px;
-    margin-bottom: 16px;
   }
 
   .stats {

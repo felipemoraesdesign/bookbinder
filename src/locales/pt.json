@@ -191,5 +191,6 @@
   "btn_reset_done": "Padrões restaurados",
   "page_range_syntax": "Use números e hífens, como 1-8 ou 1,3,5-7. Por enquanto, vão todas as páginas.",
   "page_range_out_of_range": "Esse intervalo fica fora do PDF. Por enquanto, vão todas as páginas.",
-  "preview_frame_title": "Pré-visualização da imposição"
+  "preview_frame_title": "Pré-visualização da imposição",
+  "credit": "Este app é um fork do <a href=\"https://github.com/momijizukamori/bookbinder-js\" target=\"_blank\" rel=\"noopener\">bookbinder-js</a>, criado por momijizukamori e <a href=\"https://github.com/momijizukamori/bookbinder-js/graphs/contributors\" target=\"_blank\" rel=\"noopener\">colaboradores</a> a partir do <a href=\"http://quantumelephant.co.uk/bookbinder/bookbinder.html\" target=\"_blank\" rel=\"noopener\">Bookbinder</a> original. Toda a lógica de imposição vem do trabalho deles."
 }
