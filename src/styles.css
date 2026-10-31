@@ -1537,9 +1537,13 @@ select {
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Stacked under the stage, the panel must not stay a scroll container: with overscroll
+     containment it held the page's scroll once it filled the screen at the bottom */
   .inspector {
     position: static;
     height: auto;
+    overflow: visible;
+    overscroll-behavior: auto;
     border-left: 0;
     border-top: 1px solid var(--line);
   }
