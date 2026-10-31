@@ -223,6 +223,7 @@ export class Book {
     const is90ccw = this.source_rotation == '90ccw';
     const isInBinding = this.source_rotation == 'in_binding';
     const isOutBinding = this.source_rotation == 'out_binding';
+    this.cropbox = null;
     for (var i = 0; i < pages.length; ++i) {
       const page = pages[i];
       const newPage = this.managedDoc.addPage();
@@ -254,7 +255,11 @@ export class Book {
         }
       }
       page.embed();
-      this.cropbox = newPage.getCropBox();
+      // A 0x0 page (some exporters add one at the end) would turn the layout math into NaN
+      const cropbox = newPage.getCropBox();
+      if (cropbox.width > 0 && cropbox.height > 0) {
+        this.cropbox = cropbox;
+      }
     }
 
     switch (this.format) {
@@ -487,7 +492,8 @@ export class Book {
   async displayPreview(previewPdf) {
     console.log('Attempting to generate preview for ', previewPdf);
     const previewFrame = document.getElementById('pdf');
-    const pdfDataUri = await previewPdf.saveAsBase64({ dataUri: true });
+    // A blob URL rather than a data URI: Chrome won't load a data URI over ~2 MB in a frame
+    const pdfBytes = await previewPdf.save();
     const viewerPrefs = previewPdf.catalog.getOrCreateViewerPreferences();
 
     viewerPrefs.setHideToolbar(false);
@@ -497,7 +503,7 @@ export class Book {
     viewerPrefs.setCenterWindow(true);
     viewerPrefs.setDisplayDocTitle(true);
 
-    previewFrame.src = pdfDataUri;
+    previewFrame.src = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
     previewFrame.style.display = '';
     previewFrame.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }

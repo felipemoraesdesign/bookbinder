@@ -93,6 +93,20 @@ describe('Book model', () => {
     expect(book.pagecount).toBe(3);
     expect(book.orderedpages).toEqual(['b', 'b', 1, 2, 3, 'b', 'b', 'b']);
   });
+  it('ignores zero-size pages when picking the reference crop box', async () => {
+    const book = new Book(schema.parse({}));
+    const pdf = await PDFDocument.create();
+    pdf.addPage([100, 150]);
+    pdf.addPage([100, 150]);
+    pdf.addPage([0, 0]);
+
+    book.currentdoc = pdf;
+    book.fixBlankPages();
+    await book.createpages();
+
+    expect(book.cropbox.width).toBe(100);
+    expect(book.cropbox.height).toBe(150);
+  });
   // TODO test update
   // TODO test openPDF
   // TODO test createoutputfiles

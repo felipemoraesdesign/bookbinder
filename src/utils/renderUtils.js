@@ -29,11 +29,24 @@ export function renderInfoBox(book) {
     return acc;
   }, 0);
 
+  // The special layouts carry no per-signature sheet counts or placed pages, and perfect bound
+  // treats every sheet as its own signature: show only the figures that hold for each (#92)
+  const isWacky = !['booklet', 'perfect', 'standardsig', 'customsig'].includes(book.format);
+  const hasSignatures = !isWacky && book.format !== 'perfect';
+  const title = document.getElementById('summary_title');
+  title.setAttribute('data-i18n', hasSignatures ? 'summary_title' : 'summary_title_sheets');
+  title.textContent = i18n.t(title.getAttribute('data-i18n'));
+  document.querySelector('.bookblock').hidden = !hasSignatures;
+  sigCount.parentElement.hidden = !hasSignatures;
+  totalPages.parentElement.hidden = isWacky;
+
   totalSheets.innerText = book.book.sheets;
   sigCount.innerText = book.book.sigconfig.length;
   sigArrange.innerText = book.book.sigconfig.join(', ');
   totalPages.innerText = outputPages;
-  renderSignatureBlock(document.getElementById('sig_visual'), book.book.sigconfig);
+  if (hasSignatures) {
+    renderSignatureBlock(document.getElementById('sig_visual'), book.book.sigconfig);
+  }
 }
 
 /**
@@ -314,5 +327,8 @@ export function renderFormFromSettings(configuration) {
 export function clearPreview() {
   const previewFrame = document.getElementById('pdf');
   previewFrame.style.display = 'none';
+  if (previewFrame.src.startsWith('blob:')) {
+    URL.revokeObjectURL(previewFrame.src);
+  }
   previewFrame.src = '';
 }
