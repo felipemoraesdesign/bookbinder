@@ -50,7 +50,8 @@ export function renderInfoBox(book) {
 }
 
 /**
- * Draws each signature as its folded sheets nested inside one another, seen from the head of the book.
+ * Draws the signatures as a pile of folded cadernos in oblique view, like a bookbinding manual:
+ * the head in front with each fold rounded on the left, the fore-edge on the right, the first page on top.
  * @param {HTMLElement} container
  * @param {number[]} sigconfig sheets per signature
  */
@@ -59,21 +60,35 @@ export function renderSignatureBlock(container, sigconfig) {
   const key = sigconfig.join(',');
   if (container.dataset.config === key) return;
   container.dataset.config = key;
-  const height = 56;
-  container.innerHTML = sigconfig
-    .map((sheets, i) => {
-      const width = 20 + Math.min(sheets, 14);
-      const step = Math.min(3, (height / 2 - 6) / sheets);
-      const paths = Array.from({ length: sheets }, (_, n) => {
-        const top = n * step + 1;
-        const bottom = height - n * step - 1;
-        const spine = n * step * 0.8 + 1;
-        const r = Math.min(8, (bottom - top) / 2);
-        return `<path d="M${width} ${top}H${spine + r}A${r} ${r} 0 0 0 ${spine} ${top + r}V${bottom - r}A${r} ${r} 0 0 0 ${spine + r} ${bottom}H${width}"/>`;
-      }).join('');
-      return `<svg class="sig" style="--i:${i}" width="${width}" viewBox="0 0 ${width} ${height}">${paths}</svg>`;
-    })
-    .join('');
+  const length = 150; // the head, seen from the front
+  const [dx, dy] = [34, 17]; // the page's depth, receding up and to the right
+  const sheets = sigconfig.reduce((sum, n) => sum + n, 0);
+  // big books shrink to about 72px tall
+  const unit = Math.min(1, 72 / (sheets * 1.8 + sigconfig.length * 2));
+  const x = 1 + length;
+  let y = dy + 1;
+  const cadernos = sigconfig.map((n, i) => {
+    const t = (n * 1.8 + 2) * unit;
+    const r = Math.min(t / 2, 5);
+    const page = i === 0 ? `<path d="M1 ${y}L${1 + dx} 1H${x + dx}L${x} ${y}Z"/>` : '';
+    // one line per sheet on the fore-edge, while they are far enough apart to read
+    const leaves =
+      t / n < 2
+        ? ''
+        : Array.from(
+            { length: n - 1 },
+            (_, k) => `<path class="leaf" d="M${x} ${y + ((k + 1) * t) / n}l${dx} ${-dy}"/>`
+          ).join('');
+    const caderno =
+      `<g style="--i:${sigconfig.length - 1 - i}">${page}` +
+      `<path d="M${x} ${y}H${1 + r}A${r} ${r} 0 0 0 1 ${y + r}V${y + t - r}A${r} ${r} 0 0 0 ${1 + r} ${y + t}H${x}Z"/>` +
+      `<path d="M${x} ${y}l${dx} ${-dy}v${t}l${-dx} ${dy}Z"/>${leaves}</g>`;
+    y += t;
+    return caderno;
+  });
+  const width = x + dx + 1;
+  const height = y + 1;
+  container.innerHTML = `<svg class="pile" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="stroke-width:${Math.max(0.6, Math.min(1, unit * 1.5))}">${cadernos.join('')}</svg>`;
 }
 
 /**
