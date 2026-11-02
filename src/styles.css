@@ -37,7 +37,7 @@
   --focus: 0 0 0 3px oklch(0.47 0.15 24 / 0.3);
 
   --font-ui: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --font-display: 'Crimson Pro', 'Iowan Old Style', Georgia, serif;
 
   --r-lg: 14px;
   --r: 8px;
@@ -173,6 +173,8 @@ img {
   width: 22px;
   height: 22px;
   color: var(--accent);
+  fill: currentColor;
+  stroke: none;
 }
 
 .tagline {
