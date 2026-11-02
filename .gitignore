@@ -119,3 +119,6 @@ compose.override.yaml
 
 # Firefox debug storage
 tmp
+
+# macOS app build output
+macos/build
