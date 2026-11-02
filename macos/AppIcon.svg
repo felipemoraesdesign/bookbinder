@@ -62,7 +62,7 @@
       filter="url(#stamp)"
       fill="url(#foil)"
       fill-rule="evenodd"
-      transform="translate(600 512) scale(2.35) translate(-129.5 -128)"
+      transform="translate(586 512) scale(2.15) translate(-129.5 -128)"
       d="M52 28H124A49 49 0 0 1 164.025 105.267A63 63 0 0 1 144 228H52Z M76 52H124A25 25 0 0 1 124 102H76Z M76 126H144A39 39 0 0 1 144 204H76Z M76 155H148A10 10 0 0 1 148 175H76Z"
     />
   </g>
