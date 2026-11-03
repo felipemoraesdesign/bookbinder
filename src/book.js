@@ -342,6 +342,20 @@ export class Book {
    *      generate preview content AND a downloadable zip
    */
   async createoutputfiles(isPreview) {
+    const previewPdf = await this.buildOutputs(isPreview);
+    if (previewPdf != null) await this.displayPreview(previewPdf);
+
+    if (!isPreview) return this.saveDownload();
+    else return Promise.resolve(1);
+  }
+
+  /**
+   * Generates the imposed PDFs without touching the page: fills [this.zip] (unless isPreview)
+   * and returns the PDF to preview. Used by the interface and by `impose()`.
+   * @param {boolean} isPreview - only build what the preview shows
+   * @returns {Promise<PDFDocument | null>}
+   */
+  async buildOutputs(isPreview) {
     let previewPdf = null;
 
     this.zip = new JSZip();
@@ -376,11 +390,7 @@ export class Book {
     } else if (this.format == '8_zine') {
       previewPdf = await this.buildSheets(this.filename, this.book.page_8_zine_builder());
     }
-
-    if (previewPdf != null) await this.displayPreview(previewPdf);
-
-    if (!isPreview) return this.saveDownload();
-    else return Promise.resolve(1);
+    return previewPdf;
   }
 
   /**
@@ -696,7 +706,9 @@ export class Book {
   async addPdf(path, pdf) {
     pdf.setTitle(path.split('/').pop());
     pdf.setCreator('Miolo');
-    pdf.setSubject(`${i18n.t('out_settings_link')} ${window.location.href}`);
+    // outside a browser (e.g. impose()) there is no settings link to note
+    const link = globalThis.location?.href;
+    if (link) pdf.setSubject(`${i18n.t('out_settings_link')} ${link}`);
     this.zip.file(`${path}.pdf`, await pdf.save());
     this.filelist.push(`${path}.pdf`);
   }

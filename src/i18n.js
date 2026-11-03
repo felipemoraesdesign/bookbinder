@@ -33,6 +33,7 @@ export const i18n = {
   },
 
   translateDOM() {
+    if (typeof document === 'undefined') return; // used as a library, outside a browser
     document.documentElement.lang = this.locale === 'pt' ? 'pt-BR' : 'en';
 
     document.querySelectorAll('[data-i18n]').forEach((el) => {
