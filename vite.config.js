@@ -3,7 +3,8 @@ import version from 'vite-plugin-package-version';
 import injectHTML from 'vite-plugin-html-inject';
 
 export default defineConfig({
-  base: process.env.BASE || 'https://momijizukamori.github.io/bookbinder-js/',
+  // this fork's GitHub Pages path; the upstream default made plain builds load the upstream site's assets
+  base: process.env.BASE || '/bookbinder/',
   test: {
     environment: 'jsdom',
   },

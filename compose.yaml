@@ -1,7 +1,7 @@
 services:
   bookbinder-app:
     # environment:
-    #   BASE: 'https://momijizukamori.github.io/bookbinder-js/' <-- is default in vite.config.js
+    #   BASE: '/bookbinder/' <-- is default in vite.config.js
     image: node:24
     volumes:
       - .:/app
