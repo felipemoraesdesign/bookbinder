@@ -62,7 +62,7 @@ Precisa do Node.js e das ferramentas de linha de comando do Xcode (`xcode-select
 sh macos/build.sh
 ```
 
-O app fica em `macos/build/Bookbinder.app`. Ele tem cerca de 3 MB, roda em Macs com Apple silicon e Intel e pede macOS 12 ou mais novo.
+O app fica em `macos/build/Bookbinder.app`. Ele tem cerca de 3 MB, roda em Macs com Apple silicon e Intel e pede macOS 12 ou mais novo. Em Bookbinder → Ajustes (⌘,) dá para escolher o idioma, onde salvar os arquivos e se eles abrem ao terminar o download.
 
 Para testar o app de ponta a ponta (enviar um PDF, gerar a imposição e baixar o arquivo):
 

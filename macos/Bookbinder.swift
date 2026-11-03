@@ -41,16 +41,28 @@ final class AppWebView: WKWebView {
   }
 }
 
-/// Native apps follow the system language; the page's own switcher is hidden in the app.
-let usesPortuguese = Locale.preferredLanguages.first?.hasPrefix("pt") ?? false
+/// The app's own settings (Bookbinder > Settings), kept in UserDefaults. Settings for a book stay in the page.
+enum Preferences {
+  /// "system", "pt" or "en"
+  static var language: String { UserDefaults.standard.string(forKey: "language") ?? "system" }
+  static var saveToDownloads: Bool { UserDefaults.standard.bool(forKey: "saveToDownloads") }
+  static var openWhenDone: Bool { UserDefaults.standard.bool(forKey: "openWhenDone") }
 
-func localized(_ portuguese: String, _ english: String) -> String { usesPortuguese ? portuguese : english }
+  static var usesPortuguese: Bool {
+    language == "system" ? Locale.preferredLanguages.first?.hasPrefix("pt") ?? false : language == "pt"
+  }
+}
+
+func localized(_ portuguese: String, _ english: String) -> String {
+  Preferences.usesPortuguese ? portuguese : english
+}
 
 /// The site's top bar (logo, tagline, privacy note, language) has no place in a native window: the Dock
-/// and menu carry the name, and the language follows the system. The window controls float over the
+/// and menu carry the name, and the language comes from Settings. The window controls float over the
 /// page instead, so the top strip makes room for them and moves the window like a title bar would.
-let nativeChromeScript = """
-  localStorage.setItem('bookbinder_lang', '\(usesPortuguese ? "pt" : "en")');
+func nativeChromeScript() -> String {
+  """
+  localStorage.setItem('bookbinder_lang', '\(Preferences.usesPortuguese ? "pt" : "en")');
   const style = document.createElement('style');
   // :root raises specificity: this runs before the page's own stylesheet, which would otherwise win.
   style.textContent = `
@@ -66,6 +78,7 @@ let nativeChromeScript = """
     }
   });
   """
+}
 
 /// The page's --bg token, in light and dark.
 let paperColor = NSColor(name: nil) { appearance in
@@ -93,7 +106,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     // downloads through a data URL that drops the file name; presenting as Safari keeps <a download>.
     config.applicationNameForUserAgent = "Version/18.0 Safari/605.1.15"
     config.userContentController.addUserScript(
-      WKUserScript(source: nativeChromeScript, injectionTime: .atDocumentStart, forMainFrameOnly: true))
+      WKUserScript(source: nativeChromeScript(), injectionTime: .atDocumentStart, forMainFrameOnly: true))
     config.userContentController.add(self, name: "titleBar")
     if selfTestPDF != nil {
       // Fresh, throwaway storage: the test must not read or overwrite the user's saved settings.
@@ -194,6 +207,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       try? FileManager.default.removeItem(at: url)
       return completionHandler(url)
     }
+    if Preferences.saveToDownloads {
+      let downloads = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+      return completionHandler(unusedURL(in: downloads, for: suggestedFilename))
+    }
     let panel = NSSavePanel()
     panel.nameFieldStringValue = suggestedFilename
     panel.beginSheetModal(for: window) { response in
@@ -205,10 +222,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
   }
 
   func downloadDidFinish(_ download: WKDownload) {
-    guard selfTestPDF != nil else { return }
-    let name = download.progress.fileURL?.lastPathComponent ?? "?"
-    let size = (try? download.progress.fileURL?.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
-    finishSelfTest(size > 0 ? "PASS downloaded \(name) (\(size) bytes)" : "FAIL empty download")
+    guard selfTestPDF == nil else {
+      let name = download.progress.fileURL?.lastPathComponent ?? "?"
+      let size = (try? download.progress.fileURL?.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+      return finishSelfTest(size > 0 ? "PASS downloaded \(name) (\(size) bytes)" : "FAIL empty download")
+    }
+    guard let url = download.progress.fileURL else { return }
+    // Bounces the Downloads stack in the Dock, as browsers do.
+    DistributedNotificationCenter.default().post(
+      name: Notification.Name("com.apple.DownloadFileFinished"), object: url.path)
+    guard Preferences.openWhenDone else { return }
+    // A PDF opens ready to print; a .zip is shown in the Finder rather than unpacked.
+    if url.pathExtension.lowercased() == "pdf" {
+      NSWorkspace.shared.open(url)
+    } else {
+      NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
   }
 
   func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
@@ -222,6 +251,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       if selfTestPDF != nil { finishSelfTest("FAIL cannot read \(selfTestPDF!.path)") }
       return
     }
+    snapshotSettings()
     let script = """
       for (let i = 0; i < 100 && !document.getElementById('setup_summary').textContent; i++) {
         await new Promise((r) => setTimeout(r, 100));
@@ -254,7 +284,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
 
   func finishSelfTest(_ message: String) {
     print(message)
-    exit(message.hasPrefix("PASS") ? 0 : 1)
+    // a moment for the Settings snapshots still being taken
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { exit(message.hasPrefix("PASS") ? 0 : 1) }
+  }
+
+  /// Saves a picture of each Settings tab, to check their layout without looking at the screen.
+  func snapshotSettings() {
+    showSettings(nil)
+    guard let tabs = settingsWindow?.contentViewController as? NSTabViewController else {
+      return print("settings: FAIL no tabs")
+    }
+    for index in tabs.tabViewItems.indices {
+      // each tab once the window has drawn it, or its labels come out blank
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2 + Double(index) * 0.6) {
+        tabs.selectedTabViewItemIndex = index
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+          guard let window = self.settingsWindow, let view = window.contentView?.superview,
+            let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds)
+          else { return }
+          view.cacheDisplay(in: view.bounds, to: rep)
+          let png = FileManager.default.temporaryDirectory.appendingPathComponent("bookbinder-settings-\(index).png")
+          try? rep.representation(using: .png, properties: [:])?.write(to: png)
+          print("settings: \(window.title) \(png.path)")
+        }
+      }
+    }
   }
 
   @objc func showAbout(_ sender: Any?) {
@@ -265,6 +319,253 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       attributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor])
     NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
   }
+
+  // MARK: Settings
+
+  var settingsWindow: NSWindow?
+  static let languages = ["system", "pt", "en"]
+
+  @objc func showSettings(_ sender: Any?) {
+    if settingsWindow == nil {
+      let window = NSWindow(
+        contentRect: .zero, styleMask: [.titled, .closable], backing: .buffered, defer: false)
+      window.isReleasedWhenClosed = false
+      window.toolbarStyle = .preference
+      settingsWindow = window
+      buildSettings()
+      window.center()
+    }
+    settingsWindow?.makeKeyAndOrderFront(nil)
+  }
+
+  /// Settings in two toolbar tabs, as Mac apps lay them out: General and Credits.
+  /// Rebuilt after a language change so the window's own text follows.
+  func buildSettings() {
+    guard let window = settingsWindow else { return }
+    let selected = (window.contentViewController as? NSTabViewController)?.selectedTabViewItemIndex ?? 0
+    let pages = [
+      (localized("Geral", "General"), "gearshape", generalSettingsView()),
+      (localized("Créditos", "Credits"), "person.2", creditsView()),
+    ]
+    let tabs = SettingsTabs()
+    tabs.tabStyle = .toolbar
+    for (label, symbol, view) in pages {
+      let page = NSViewController()
+      page.view = view
+      page.title = label
+      // each tab as tall as its content; the window resizes when switching
+      page.preferredContentSize = view.fittingSize
+      let item = NSTabViewItem(viewController: page)
+      item.label = label
+      item.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
+      tabs.addTabViewItem(item)
+    }
+    tabs.selectedTabViewItemIndex = selected
+    window.contentViewController = tabs
+    window.setContentSize(pages[selected].2.fittingSize)
+    window.title = pages[selected].0
+  }
+
+  /// Language and what happens to a download, aligned to the left.
+  func generalSettingsView() -> NSView {
+    let language = NSPopUpButton()
+    language.addItems(withTitles: [localized("Igual ao sistema", "Same as the system"), "Português", "English"])
+    language.selectItem(at: Self.languages.firstIndex(of: Preferences.language) ?? 0)
+    language.target = self
+    language.action = #selector(languageChanged(_:))
+    // as wide as its longest choice, not the whole column
+    language.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+
+    // Radio buttons sharing an action and a superview act as one group.
+    let ask = NSButton(
+      radioButtonWithTitle: localized("Perguntar onde salvar", "Ask where to save"),
+      target: self, action: #selector(saveLocationChanged(_:)))
+    let downloads = NSButton(
+      radioButtonWithTitle: localized("Salvar direto em Downloads", "Save straight to Downloads"),
+      target: self, action: #selector(saveLocationChanged(_:)))
+    downloads.tag = 1
+    (Preferences.saveToDownloads ? downloads : ask).state = .on
+
+    let open = NSButton(
+      checkboxWithTitle: localized("Abrir o arquivo ao terminar", "Open the file when it’s done"),
+      target: self, action: #selector(openWhenDoneChanged(_:)))
+    open.state = Preferences.openWhenDone ? .on : .off
+    let hint = NSTextField(
+      wrappingLabelWithString: localized(
+        "PDFs abrem no Pré-Visualização; arquivos .zip, no Finder.",
+        "PDFs open in Preview; .zip files in the Finder."))
+    hint.font = .systemFont(ofSize: 11)
+    hint.textColor = .secondaryLabelColor
+    // a fixed width, so the label knows how many lines it wraps to
+    hint.preferredMaxLayoutWidth = 210
+    hint.translatesAutoresizingMaskIntoConstraints = false
+    // indented to line up with the checkbox's title rather than its box
+    let hintBox = NSView()
+    hintBox.addSubview(hint)
+    NSLayoutConstraint.activate([
+      hint.widthAnchor.constraint(equalToConstant: 210),
+      hint.leadingAnchor.constraint(equalTo: hintBox.leadingAnchor, constant: 20),
+      hint.trailingAnchor.constraint(equalTo: hintBox.trailingAnchor),
+      hint.topAnchor.constraint(equalTo: hintBox.topAnchor),
+      hint.bottomAnchor.constraint(equalTo: hintBox.bottomAnchor),
+    ])
+
+    let grid = NSGridView(views: [
+      [NSTextField(labelWithString: localized("Idioma:", "Language:")), language],
+      [NSTextField(labelWithString: localized("Ao baixar:", "Downloads:")), ask],
+      [NSGridCell.emptyContentView, downloads],
+      [NSGridCell.emptyContentView, open],
+      [NSGridCell.emptyContentView, hintBox],
+    ])
+    grid.column(at: 0).xPlacement = .leading
+    grid.column(at: 1).xPlacement = .leading
+    grid.rowAlignment = .firstBaseline
+    grid.columnSpacing = 8
+    grid.rowSpacing = 8
+    grid.row(at: 1).topPadding = 14
+    grid.row(at: 3).topPadding = 6
+    // the hint's box has no baseline; it sits right under the checkbox
+    grid.row(at: 4).rowAlignment = .none
+    grid.row(at: 4).yPlacement = .top
+    grid.row(at: 4).topPadding = -2
+    // hugs its content, so the form sits at the top left instead of stretching to fill the tab
+    grid.setContentHuggingPriority(.defaultHigh, for: .vertical)
+    grid.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+
+    return page([grid], alignment: .leading)
+  }
+
+  /// Who made the app possible, centered like an About window.
+  func creditsView() -> NSView {
+    let icon = NSImageView(image: NSApp.applicationIconImage)
+    icon.imageScaling = .scaleProportionallyUpOrDown
+    NSLayoutConstraint.activate([
+      icon.widthAnchor.constraint(equalToConstant: 72), icon.heightAnchor.constraint(equalToConstant: 72),
+    ])
+
+    let name = NSTextField(labelWithString: "Bookbinder")
+    name.font = .boldSystemFont(ofSize: 15)
+    let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
+    let versionLabel = NSTextField(labelWithString: localized("Versão \(version)", "Version \(version)"))
+    versionLabel.font = .systemFont(ofSize: 11)
+    versionLabel.textColor = .secondaryLabelColor
+
+    let repo = "https://github.com/momijizukamori/bookbinder-js"
+    let original = "http://quantumelephant.co.uk/bookbinder/bookbinder.html"
+    let credits = Preferences.usesPortuguese
+      ? linkedLabel(
+        [
+          ("Este app é um fork do ", nil), ("bookbinder-js", repo), (", criado por momijizukamori e ", nil),
+          ("colaboradores", repo + "/graphs/contributors"), (" a partir do ", nil), ("Bookbinder", original),
+          (" original. Toda a lógica de imposição vem do trabalho deles.", nil),
+        ], size: 12)
+      : linkedLabel(
+        [
+          ("This app is a fork of ", nil), ("bookbinder-js", repo), (", created by momijizukamori and ", nil),
+          ("contributors", repo + "/graphs/contributors"), (" from the original ", nil), ("Bookbinder", original),
+          (". All of the imposition logic comes from their work.", nil),
+        ], size: 12)
+    let code = linkedLabel(
+      [(localized("Ver o código no GitHub", "See the code on GitHub"), "https://github.com/felipemoraesdesign/bookbinder")],
+      size: 12)
+    let license = linkedLabel(
+      [
+        (localized("Código aberto sob a ", "Open source under the "), nil),
+        ("Mozilla Public License 2.0", "https://www.mozilla.org/MPL/2.0/"),
+      ], size: 11, color: .tertiaryLabelColor)
+
+    let content = page([icon, name, versionLabel, credits, code, license], alignment: .centerX)
+    content.spacing = 4
+    content.setCustomSpacing(10, after: icon)
+    content.setCustomSpacing(14, after: versionLabel)
+    content.setCustomSpacing(14, after: credits)
+    return content
+  }
+
+  /// A tab's content: a vertical stack with the window's margins.
+  func page(_ views: [NSView], alignment: NSLayoutConstraint.Attribute) -> NSStackView {
+    let stack = NSStackView(views: views)
+    stack.orientation = .vertical
+    stack.alignment = alignment
+    stack.spacing = 8
+    stack.edgeInsets = NSEdgeInsets(top: 24, left: 40, bottom: 28, right: 40)
+    stack.widthAnchor.constraint(equalToConstant: 480).isActive = true
+    return stack
+  }
+
+  /// A centered, wrapping label whose linked parts open in the default browser.
+  func linkedLabel(
+    _ parts: [(String, String?)], size: CGFloat, color: NSColor = .secondaryLabelColor
+  ) -> NSTextField {
+    let paragraph = NSMutableParagraphStyle()
+    paragraph.alignment = .center
+    paragraph.lineSpacing = 2
+    let text = NSMutableAttributedString()
+    for (part, link) in parts {
+      var attributes: [NSAttributedString.Key: Any] = [
+        .font: NSFont.systemFont(ofSize: size), .foregroundColor: color, .paragraphStyle: paragraph,
+      ]
+      if let link { attributes[.link] = URL(string: link) }
+      text.append(NSAttributedString(string: part, attributes: attributes))
+    }
+    let label = NSTextField(wrappingLabelWithString: "")
+    // Links only respond in a selectable field that keeps its text attributes.
+    label.isSelectable = true
+    label.allowsEditingTextAttributes = true
+    label.attributedStringValue = text
+    label.alignment = .center
+    label.preferredMaxLayoutWidth = 360
+    return label
+  }
+
+  @objc func languageChanged(_ sender: NSPopUpButton) {
+    UserDefaults.standard.set(Self.languages[sender.indexOfSelectedItem], forKey: "language")
+    // The page switches now and keeps the language on later loads; menus and this window are rebuilt.
+    let scripts = webView.configuration.userContentController
+    scripts.removeAllUserScripts()
+    scripts.addUserScript(
+      WKUserScript(source: nativeChromeScript(), injectionTime: .atDocumentStart, forMainFrameOnly: true))
+    webView.evaluateJavaScript("setLanguage('\(Preferences.usesPortuguese ? "pt" : "en")')")
+    NSApp.mainMenu = makeMainMenu()
+    // After this action returns, so the pop-up isn't replaced while it's still handling the click.
+    DispatchQueue.main.async { self.buildSettings() }
+  }
+
+  @objc func saveLocationChanged(_ sender: NSButton) {
+    UserDefaults.standard.set(sender.tag == 1, forKey: "saveToDownloads")
+  }
+
+  @objc func openWhenDoneChanged(_ sender: NSButton) {
+    UserDefaults.standard.set(sender.state == .on, forKey: "openWhenDone")
+  }
+}
+
+/// Settings tabs that, as Mac settings windows do, name the window after the open tab and resize it
+/// to fit, keeping its top edge in place.
+final class SettingsTabs: NSTabViewController {
+  override func tabView(_ tabView: NSTabView, didSelect item: NSTabViewItem?) {
+    super.tabView(tabView, didSelect: item)
+    guard let window = view.window, let item, let size = item.viewController?.preferredContentSize else {
+      return
+    }
+    window.title = item.label
+    var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: size))
+    frame.origin = NSPoint(x: window.frame.minX, y: window.frame.maxY - frame.height)
+    window.setFrame(frame, display: true, animate: true)
+  }
+}
+
+/// `folder/name`, numbered like the Finder ("name 2.pdf") when a file already has that name.
+func unusedURL(in folder: URL, for filename: String) -> URL {
+  let base = (filename as NSString).deletingPathExtension
+  let ext = (filename as NSString).pathExtension
+  var url = folder.appendingPathComponent(filename)
+  var number = 2
+  while FileManager.default.fileExists(atPath: url.path) {
+    url = folder.appendingPathComponent(ext.isEmpty ? "\(base) \(number)" : "\(base) \(number).\(ext)")
+    number += 1
+  }
+  return url
 }
 
 func makeMainMenu() -> NSMenu {
@@ -280,6 +581,8 @@ func makeMainMenu() -> NSMenu {
   let main = NSMenu()
   main.addItem(menu("Bookbinder", [
     (localized("Sobre o Bookbinder", "About Bookbinder"), #selector(AppDelegate.showAbout(_:)), ""),
+    ("", nil, ""),
+    (localized("Ajustes…", "Settings…"), #selector(AppDelegate.showSettings(_:)), ","),
     ("", nil, ""),
     (localized("Ocultar Bookbinder", "Hide Bookbinder"), #selector(NSApplication.hide(_:)), "h"),
     (localized("Sair do Bookbinder", "Quit Bookbinder"), #selector(NSApplication.terminate(_:)), "q"),
