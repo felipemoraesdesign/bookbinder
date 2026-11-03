@@ -8,7 +8,7 @@ Este é um fork do [bookbinder-js](https://github.com/momijizukamori/bookbinder-
 
 ## Usar
 
-- **No navegador:** [felipemoraesdesign.github.io/miolo](https://felipemoraesdesign.github.io/miolo/)
+- **No navegador:** [luizfelipermoraes.github.io/miolo](https://luizfelipermoraes.github.io/miolo/)
 - **No Mac:** gere o app com as instruções em [App para Mac](#app-para-mac).
 
 Para escolher o tamanho do papel de acordo com o formato, veja o [guia de tamanhos](https://docs.google.com/spreadsheets/d/1Qi9Qlbd4QBj6lErnFaRe8rdBsrX0tD7cWf0iOW1V0Vs/edit#gid=0) feito pela comunidade do projeto original.

@@ -487,7 +487,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
           (". All of the imposition logic comes from their work.", nil),
         ], size: 12)
     let code = linkedLabel(
-      [(localized("Ver o código no GitHub", "See the code on GitHub"), "https://github.com/felipemoraesdesign/miolo")],
+      [(localized("Ver o código no GitHub", "See the code on GitHub"), "https://github.com/luizfelipermoraes/miolo")],
       size: 12)
     let license = linkedLabel(
       [
