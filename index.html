@@ -21,8 +21,8 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&display=swap"
     />
-    <script type="module" crossorigin src="/bookbinder/assets/index-CBoNh66j.js"></script>
-    <link rel="stylesheet" crossorigin href="/bookbinder/assets/index-DfcNq2jt.css">
+    <script type="module" crossorigin src="/bookbinder/assets/index-DFpEytrb.js"></script>
+    <link rel="stylesheet" crossorigin href="/bookbinder/assets/index-Cykfl4Ka.css">
   </head>
 
   <body data-state="empty">
@@ -192,7 +192,7 @@
 
 <div class="actionbar">
   <p class="actionbar-note" id="action_note" data-i18n="download_note" aria-live="polite">
-    Você recebe um .zip com o PDF pronto para imprimir.
+    Você recebe um .zip com os arquivos prontos para imprimir.
   </p>
   <button
     type="button"
@@ -228,6 +228,36 @@
       </main>
 
       <aside class="inspector" data-i18n-tooltip="settings_label" aria-label="Configurações">
+        <section class="presets" aria-labelledby="presets_title">
+  <div class="presets-head">
+    <h2 class="presets-title" id="presets_title" data-i18n="presets_title">Predefinições</h2>
+    <button type="button" class="link-btn" id="preset_new" data-i18n="preset_save">
+      Salvar atual
+    </button>
+  </div>
+  <div class="preset-form" id="preset_form" hidden>
+    <input
+      type="text"
+      id="preset_name"
+      class="preset-name"
+      maxlength="60"
+      autocomplete="off"
+      data-i18n-tooltip="preset_name_label"
+      aria-label="Nome da predefinição"
+    />
+    <button type="button" class="btn btn-secondary" id="preset_confirm" data-i18n="preset_confirm">
+      Salvar
+    </button>
+    <button type="button" class="link-btn" id="preset_cancel" data-i18n="preset_cancel">
+      Cancelar
+    </button>
+  </div>
+  <ul class="preset-list" id="preset_list"></ul>
+  <p class="hint" id="presets_empty" data-i18n="presets_empty">
+    Salve as configurações que você mais usa para trocar de formato com um clique.
+  </p>
+</section>
+
         <details class="panel" id="sig_format" open>
   <summary><span data-i18n="sig_format_title">Encadernação</span></summary>
   <div class="panel-body">
@@ -510,7 +540,7 @@
     </label>
 
     <label class="field" for="print_file">
-      <span class="field-label" data-i18n="generated_files">O que vem no .zip</span>
+      <span class="field-label" data-i18n="generated_files">O que baixar</span>
       <select name="print_file" id="print_file">
         <option value="aggregated" data-i18n="gen_aggregated">Só o arquivo completo</option>
         <option value="both" selected data-i18n="gen_both">
