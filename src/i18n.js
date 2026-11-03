@@ -26,8 +26,10 @@ export const i18n = {
     this.translateDOM();
   },
 
-  t(key) {
-    return this.translations[key] ?? key;
+  // fills {placeholders} in the text from vars, e.g. t('out_zip', { name })
+  t(key, vars = {}) {
+    const text = this.translations[key] ?? key;
+    return text.replace(/\{(\w+)\}/g, (match, name) => vars[name] ?? match);
   },
 
   translateDOM() {

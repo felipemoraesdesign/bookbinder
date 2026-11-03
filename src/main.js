@@ -10,6 +10,7 @@ import {
   handlePreviewClick,
   handleResetSettingsClick,
   handleSewingMarksCheckboxState,
+  renderDownloadNote,
   setLabel,
 } from './utils/clickHandlers.js';
 import { renderPaperSelectOptions } from './utils/renderUtils.js';
@@ -78,18 +79,30 @@ window.addEventListener('DOMContentLoaded', async () => {
   // spin up a book to pass to listeners
   const book = new Book(configuration);
 
-  // Returning users see the setup their next PDF will get, so they can drop it without opening the panel.
-  const renderSetupSummary = () => {
-    const format = bookbinderForm.querySelector('input[name="sig_format"]:checked');
-    const printer = bookbinderForm.querySelector('input[name="printer_type"]:checked');
-    const parts = [
+  const checked = (name) => bookbinderForm.querySelector(`input[name="${name}"]:checked`);
+
+  // The setup in a few words, e.g. "Cadernos, 4 folhas cada, A4, frente e verso"
+  const describeSetup = () => {
+    const format = checked('sig_format');
+    return [
       format?.closest('.choice')?.querySelector('.choice-title')?.textContent,
       format?.value === 'standardsig' &&
         `${bookbinderForm.elements.sig_length.value} ${i18n.t('sheets_each')}`,
       bookbinderForm.elements.paper_size.value,
-      printer?.nextElementSibling?.textContent.toLocaleLowerCase(i18n.locale),
-    ].filter(Boolean);
-    setupSummary.textContent = `${i18n.t('setup_current')} ${parts.join(', ')}`;
+      checked('printer_type')?.nextElementSibling?.textContent.toLocaleLowerCase(i18n.locale),
+    ]
+      .filter(Boolean)
+      .join(', ');
+  };
+
+  // Returning users see the setup their next PDF will get, so they can drop it without opening the panel.
+  const renderSetupSummary = () => {
+    setupSummary.textContent = `${i18n.t('setup_current')} ${describeSetup()}`;
+    renderDownloadNote({
+      sigFormat: checked('sig_format')?.value,
+      printFile: bookbinderForm.elements.print_file.value,
+      printerType: checked('printer_type')?.value,
+    });
   };
 
   const validatePageRange = () => {

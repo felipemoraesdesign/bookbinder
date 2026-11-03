@@ -19,6 +19,19 @@ import {
 import { calculateDimensions, calculateLayout } from './utils/layout.js';
 import { parsePageRange } from './utils/pageRange.js';
 import { interleavePages, embedPagesInNewPdf } from './utils/pdf.js';
+import { i18n } from './i18n.js';
+import { makesSinglePdf } from './utils/download.js';
+
+// Special layouts name their file after the label the interface shows
+const SPECIAL_LAYOUT_LABELS = {
+  '8_zine': 'sig_8_zine',
+  '1_3rd': 'sig_1_3rd',
+  A7_2_16s: 'sig_a7',
+  a_3_6s: 'sig_a3',
+  a9_3_3_4: 'sig_a9',
+  a_4_8s: 'sig_a4',
+  a10_6_10s: 'sig_a10',
+};
 
 // Some JSDoc typedefs we use multiple places
 /**
@@ -331,15 +344,13 @@ export class Book {
   async createoutputfiles(isPreview) {
     let previewPdf = null;
 
-    //  create a directory named after the input pdf and fill it with
-    //  the signatures
     this.zip = new JSZip();
-    var origFileName = this.inputpdf;
-    origFileName = origFileName
-      .replace(/[-\s,_]+/g, '_')
-      .replace(/_*\.pdf/g, '')
-      .toLowerCase();
-    this.filename = origFileName;
+    // keep the PDF's own name, dropping only the extension and characters file systems reject
+    this.filename =
+      this.inputpdf
+        .replace(/\.pdf$/i, '')
+        .replace(/[\\/:*?"<>|]+/g, '-')
+        .trim() || 'Bookbinder';
 
     if (
       this.format == 'perfect' ||
@@ -350,10 +361,6 @@ export class Book {
       const signatures = [{}];
       previewPdf = await this.generateClassicFiles(isPreview, signatures);
       if (!isPreview) await this.saveClassicFiles(signatures);
-      var rotationMetaInfo =
-        (this.paper_rotation_90 ? 'paper_rotated' : '') +
-        (this.source_rotation == 'none' ? '' : `_${this.source_rotation}`);
-      this.filename = `${origFileName}${rotationMetaInfo}`;
     } else if (this.format == 'a9_3_3_4') {
       previewPdf = await this.buildSheets(this.filename, this.book.a9_3_3_4_builder());
     } else if (this.format == 'a10_6_10s') {
@@ -372,7 +379,7 @@ export class Book {
 
     if (previewPdf != null) await this.displayPreview(previewPdf);
 
-    if (!isPreview) return this.saveZip();
+    if (!isPreview) return this.saveDownload();
     else return Promise.resolve(1);
   }
 
@@ -388,9 +395,17 @@ export class Book {
     const pagesArr = isPreview ? this.rearrangedpages.slice(0, 1) : this.rearrangedpages;
     let previewPdf = null;
     const makeSignatures = async () => {
+      // zero-padded so a folder of 10 or more signatures sorts in order
+      const pad = (n) => String(n).padStart(String(pagesArr.length).length, '0');
       const tasks = pagesArr.map(async (pages, i) => {
         console.log(pages);
-        signatures[i] = { name: `${this.filename}_signature${i}` };
+        signatures[i] = {
+          name: i18n.t('out_signature', {
+            name: this.filename,
+            n: pad(i + 1),
+            total: pagesArr.length,
+          }),
+        };
         [signatures[i].front, signatures[i].back] = await this.createSignature({
           pageIndexDetails: pages,
           maxSigCount: pagesArr.length,
@@ -421,16 +436,9 @@ export class Book {
   async saveClassicFiles(signatures) {
     if (this.print_file != 'aggregated') {
       const saveSignatures = async () => {
+        const folder = i18n.t('out_signatures_folder');
         const tasks = signatures.map(async (sig) => {
-          await sig.front?.save().then((pdfBytes) => {
-            this.zip.file(`signatures/${sig.name}_side1.pdf`, pdfBytes);
-          });
-          await sig.back?.save().then((pdfBytes) => {
-            this.zip.file(`signatures/${sig.name}_side2.pdf`, pdfBytes);
-          });
-          await sig.duplex?.save().then((pdfBytes) => {
-            this.zip.file(`signatures/${sig.name}_duplex.pdf`, pdfBytes);
-          });
+          await this.addSides(`${folder}/${sig.name}`, sig);
         });
         await Promise.all(tasks);
       };
@@ -465,21 +473,7 @@ export class Book {
             copiedPages.forEach((page) => aggregate.duplex.addPage(page));
           }
         }
-        if (aggregate.front) {
-          await aggregate.front.save().then((pdfBytes) => {
-            this.zip.file(`${this.filename}_typeset_side1.pdf`, pdfBytes);
-          });
-        }
-        if (aggregate.back) {
-          await aggregate.back.save().then((pdfBytes) => {
-            this.zip.file(`${this.filename}_typeset_side2.pdf`, pdfBytes);
-          });
-        }
-        if (aggregate.duplex) {
-          await aggregate.duplex.save().then((pdfBytes) => {
-            this.zip.file(`${this.filename}_typeset.pdf`, pdfBytes);
-          });
-        }
+        await this.addSides(i18n.t('out_imposed', { name: this.filename }), aggregate);
       };
       await saveAggregate();
     }
@@ -693,22 +687,53 @@ export class Book {
     return [pdfFront, pdfBack];
   }
 
-  bundleSettings() {
-    const currentConfig = loadConfiguration();
-    const settings =
-      `Imposer settings: ${JSON.stringify(currentConfig, null, 2)}` +
-      '\n\n' +
-      `Link to the imposer with these settings: ${window.location.href}`;
-    this.zip.file('settings.txt', settings);
+  /**
+   * Adds a PDF to the download, titled after its file and noting the settings that made it,
+   * so a PDF downloaded on its own still says how to make it again.
+   * @param {string} path - file path in the .zip, without the extension
+   * @param {PDFDocument} pdf
+   */
+  async addPdf(path, pdf) {
+    pdf.setTitle(path.split('/').pop());
+    pdf.setCreator('Bookbinder');
+    pdf.setSubject(`${i18n.t('out_settings_link')} ${window.location.href}`);
+    this.zip.file(`${path}.pdf`, await pdf.save());
+    this.filelist.push(`${path}.pdf`);
   }
 
-  saveZip() {
-    console.log('Saving zip... ');
-    this.bundleSettings();
-    return this.zip.generateAsync({ type: 'blob' }).then((blob) => {
-      console.log('  calling saveAs on ', this.filename);
-      saveAs(blob, `${this.filename}_bookbinder.zip`);
+  /**
+   * Adds one file for duplex printing, or a front and a back file to print in two passes.
+   * @param {string} path - file path in the .zip, without the extension
+   * @param {{ duplex?: PDFDocument, front?: PDFDocument, back?: PDFDocument }} sides
+   */
+  async addSides(path, { duplex, front, back }) {
+    if (duplex) await this.addPdf(path, duplex);
+    if (front) await this.addPdf(`${path} - ${i18n.t('out_front')}`, front);
+    if (back) await this.addPdf(`${path} - ${i18n.t('out_back')}`, back);
+  }
+
+  bundleSettings() {
+    const json = JSON.stringify(loadConfiguration(), null, 2);
+    const settings = `${i18n.t('out_settings_link')}\n${window.location.href}\n\n${json}`;
+    this.zip.file(`${i18n.t('out_settings_file')}.txt`, settings);
+  }
+
+  /** Saves a lone PDF as is, so it opens straight away; several files go in a .zip with the settings. */
+  async saveDownload() {
+    const pdfs = this.zip.file(/\.pdf$/);
+    const single = makesSinglePdf({
+      sigFormat: this.format,
+      printFile: this.print_file,
+      printerType: this.duplex ? 'duplex' : 'single',
     });
+    if (pdfs.length === 1 && single) {
+      const bytes = await pdfs[0].async('uint8array');
+      saveAs(new Blob([bytes], { type: 'application/pdf' }), pdfs[0].name);
+      return;
+    }
+    this.bundleSettings();
+    const blob = await this.zip.generateAsync({ type: 'blob' });
+    saveAs(blob, `${i18n.t('out_zip', { name: this.filename })}.zip`);
   }
 
   /**
@@ -735,7 +760,6 @@ export class Book {
    * @param {SheetMaker} builder.sheetMaker: function that takes the page count as a param and returns an array of sheets
    * @param {LineMaker} builder.lineMaker: function that makes a function that generates trim lines for the PDF
    * @param {boolean} builder.isLandscape: true if we need to have largest dimension be width
-   * @param {string} builder.fileNameMod: string to affix to exported file name (contains no buffer begin/end characters)
    * @param {boolean} builder.isPacked: boolean - true if white spaces goes on the outside, false if white space goes everywhere (non-binding edge)
    */
   async buildSheets(id, builder) {
@@ -759,24 +783,10 @@ export class Book {
         lineMaker
       );
     }
-    {
-      console.log(`Trying to save to PDF ${builder.fileNameMod} w/ packing : ${this.pack_pages}`);
-      const fileName = `${id}_${builder.fileNameMod}${this.duplex ? '' : '_fronts'}.pdf`;
-      await outPDF.save().then((pdfBytes) => {
-        console.log('Calling zip.file on ', fileName);
-        this.zip.file(fileName, pdfBytes);
-      });
-      this.filelist.push(fileName);
-    }
-    if (!this.duplex) {
-      console.log('Trying to save to PDF (back pages)');
-      const fileName = `${id}_${builder.fileNameMod}_backs.pdf`;
-      await outPDF_back.save().then((pdfBytes) => {
-        console.log('Calling zip.file on ', fileName);
-        this.zip.file(fileName, pdfBytes);
-      });
-      this.filelist.push(fileName);
-    }
+    await this.addSides(
+      `${id} - ${i18n.t(SPECIAL_LAYOUT_LABELS[this.format])}`,
+      this.duplex ? { duplex: outPDF } : { front: outPDF, back: outPDF_back }
+    );
     console.log('buildSheets complete');
     return outPDF;
   }

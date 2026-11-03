@@ -3,6 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import { i18n } from '../i18n.js';
+import { makesSinglePdf } from './download.js';
 import { resetForm } from './formUtils';
 import {
   clearPreview,
@@ -33,6 +34,10 @@ function setDone(buttonEl, labelKey, idleKey) {
 function showActionError(messageKey) {
   const note = document.getElementById('action_note');
   note.classList.add('is-error');
+  setNote(note, messageKey);
+}
+
+function setNote(note, messageKey) {
   note.setAttribute('data-i18n', messageKey);
   note.textContent = i18n.t(messageKey);
 }
@@ -40,8 +45,17 @@ function showActionError(messageKey) {
 function clearActionError() {
   const note = document.getElementById('action_note');
   note.classList.remove('is-error');
-  note.setAttribute('data-i18n', 'download_note');
-  note.textContent = i18n.t('download_note');
+  setNote(note, note.dataset.downloadKey ?? 'download_note');
+}
+
+/**
+ * Tells, under the actions, whether the download is a single PDF or a .zip.
+ * @param {{ sigFormat: string, printFile: string, printerType: string }} settings
+ */
+export function renderDownloadNote(settings) {
+  const note = document.getElementById('action_note');
+  note.dataset.downloadKey = makesSinglePdf(settings) ? 'download_note_pdf' : 'download_note';
+  if (!note.classList.contains('is-error')) setNote(note, note.dataset.downloadKey);
 }
 
 export function setLabel(buttonEl, labelKey) {

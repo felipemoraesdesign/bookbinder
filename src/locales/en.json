@@ -8,7 +8,7 @@
   "file_info_title": "Pages and files",
   "input_file": "Input File:",
   "file_warning": "Page 1 of the PDF always prints on the right. The first printed spread is 2–3: evens left, odds right.",
-  "generated_files": "What goes in the .zip",
+  "generated_files": "What to download",
   "gen_aggregated": "Full file only",
   "gen_both": "Full file + one per signature",
   "gen_signatures": "Signature files only",
@@ -161,7 +161,7 @@
   "drop_sub": "Pick a format in the side panel and download the imposition ready to print.",
   "drop_button": "Choose PDF",
   "file_change": "Change file",
-  "download_note": "You get a .zip with the print-ready PDF.",
+  "download_note": "You get a .zip with the print-ready files.",
   "btn_previewing": "Building preview…",
   "btn_generating": "Generating files…",
   "sheet_view_title": "Page on the sheet",
@@ -193,5 +193,14 @@
   "page_range_out_of_range": "That range is outside the PDF. All pages are used for now.",
   "preview_frame_title": "Imposition preview",
   "credit": "This app is a fork of <a href=\"https://github.com/momijizukamori/bookbinder-js\" target=\"_blank\" rel=\"noopener\">bookbinder-js</a>, created by momijizukamori and <a href=\"https://github.com/momijizukamori/bookbinder-js/graphs/contributors\" target=\"_blank\" rel=\"noopener\">contributors</a> from the original <a href=\"http://quantumelephant.co.uk/bookbinder/bookbinder.html\" target=\"_blank\" rel=\"noopener\">Bookbinder</a>. All of the imposition logic comes from their work.",
-  "summary_title_sheets": "Your print run"
+  "summary_title_sheets": "Your print run",
+  "download_note_pdf": "You get the print-ready PDF.",
+  "out_zip": "{name} (imposed)",
+  "out_imposed": "{name} - imposed",
+  "out_signature": "{name} - signature {n} of {total}",
+  "out_signatures_folder": "signatures",
+  "out_front": "front",
+  "out_back": "back",
+  "out_settings_file": "settings",
+  "out_settings_link": "Made with Bookbinder. To make it again with the same settings, open:"
 }

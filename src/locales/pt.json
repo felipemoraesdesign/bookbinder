@@ -8,7 +8,7 @@
   "file_info_title": "Páginas e arquivos",
   "input_file": "Arquivo de Entrada:",
   "file_warning": "A página 1 do PDF sai sempre à direita. A primeira página dupla impressa é 2–3: pares à esquerda, ímpares à direita.",
-  "generated_files": "O que vem no .zip",
+  "generated_files": "O que baixar",
   "gen_aggregated": "Só o arquivo completo",
   "gen_both": "Arquivo completo + um por caderno",
   "gen_signatures": "Só os arquivos por caderno",
@@ -161,7 +161,7 @@
   "drop_sub": "Escolha o formato no painel ao lado e baixe a imposição pronta para imprimir.",
   "drop_button": "Escolher PDF",
   "file_change": "Trocar arquivo",
-  "download_note": "Você recebe um .zip com o PDF pronto para imprimir.",
+  "download_note": "Você recebe um .zip com os arquivos prontos para imprimir.",
   "btn_previewing": "Gerando prévia…",
   "btn_generating": "Gerando arquivos…",
   "sheet_view_title": "Página na folha",
@@ -193,5 +193,14 @@
   "page_range_out_of_range": "Esse intervalo fica fora do PDF. Por enquanto, vão todas as páginas.",
   "preview_frame_title": "Pré-visualização da imposição",
   "credit": "Este app é um fork do <a href=\"https://github.com/momijizukamori/bookbinder-js\" target=\"_blank\" rel=\"noopener\">bookbinder-js</a>, criado por momijizukamori e <a href=\"https://github.com/momijizukamori/bookbinder-js/graphs/contributors\" target=\"_blank\" rel=\"noopener\">colaboradores</a> a partir do <a href=\"http://quantumelephant.co.uk/bookbinder/bookbinder.html\" target=\"_blank\" rel=\"noopener\">Bookbinder</a> original. Toda a lógica de imposição vem do trabalho deles.",
-  "summary_title_sheets": "Sua impressão"
+  "summary_title_sheets": "Sua impressão",
+  "download_note_pdf": "Você recebe o PDF pronto para imprimir.",
+  "out_zip": "{name} (imposição)",
+  "out_imposed": "{name} - imposição",
+  "out_signature": "{name} - caderno {n} de {total}",
+  "out_signatures_folder": "cadernos",
+  "out_front": "frente",
+  "out_back": "verso",
+  "out_settings_file": "configurações",
+  "out_settings_link": "Gerado pelo Bookbinder. Para gerar de novo com as mesmas configurações, abra:"
 }

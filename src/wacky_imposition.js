@@ -43,7 +43,6 @@ export class WackyImposition {
       sheetMaker: this.build_8_zine_sheetList.bind(this),
       lineMaker: this.build_8_zine_lineFunction.bind(this),
       isLandscape: false,
-      fileNameMod: `8_zine${this.isPacked ? '_packed' : '_spread'}`,
     };
   }
 
@@ -52,7 +51,6 @@ export class WackyImposition {
       sheetMaker: this.build_1_3rd_sheetList.bind(this),
       lineMaker: this.build_1_3rd_lineFunction.bind(this),
       isLandscape: false,
-      fileNameMod: `one_third${this.isPacked ? '_packed' : '_spread'}`,
     };
   }
 
@@ -61,7 +59,6 @@ export class WackyImposition {
       sheetMaker: this.build_3_3_4_sheetList.bind(this),
       lineMaker: this.build_3_3_4_lineFunction.bind(this),
       isLandscape: false,
-      fileNameMod: `little${this.isPacked ? '_packed' : '_spread'}`,
     };
   }
 
@@ -70,7 +67,6 @@ export class WackyImposition {
       sheetMaker: this.build_6_10s_sheetList.bind(this),
       lineMaker: this.build_6_10s_lineFunction.bind(this),
       isLandscape: true,
-      fileNameMod: `mini${this.isPacked ? '_packed' : '_spread'}`,
     };
   }
 
@@ -79,7 +75,6 @@ export class WackyImposition {
       sheetMaker: this.build_3_6s_sheetList.bind(this),
       lineMaker: this.build_strip_lineFunction.bind(this, 3, 6),
       isLandscape: true,
-      fileNameMod: `3_by_6${this.isPacked ? '_packed' : '_spread'}`,
     };
   }
 
@@ -88,7 +83,6 @@ export class WackyImposition {
       sheetMaker: this.build_4_8s_sheetList.bind(this),
       lineMaker: this.build_strip_lineFunction.bind(this, 4, 8),
       isLandscape: true,
-      fileNameMod: `4_by_8${this.isPacked ? '_packed' : '_spread'}`,
     };
   }
 
@@ -97,7 +91,6 @@ export class WackyImposition {
       sheetMaker: this.build_2_16s_sheetList.bind(this),
       lineMaker: this.build_2_16s_lineFunction.bind(this),
       isLandscape: false,
-      fileNameMod: `4_by_4_two_signatures${this.isPacked ? '_packed' : '_spread'}`,
     };
   }
 
