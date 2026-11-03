@@ -1,5 +1,5 @@
 {
-  "name": "bookbinder",
+  "name": "miolo",
   "version": "1.7.0",
   "description": "An app to rearrange PDF pages for printing for bookbinding",
   "type": "module",

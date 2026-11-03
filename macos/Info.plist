@@ -3,13 +3,14 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleName</key>
-  <string>Bookbinder</string>
+  <string>Miolo</string>
   <key>CFBundleDisplayName</key>
-  <string>Bookbinder</string>
+  <string>Miolo</string>
+  <!-- the old name stays in the identifier: macOS keeps the app’s settings and saved data under it -->
   <key>CFBundleIdentifier</key>
   <string>io.github.felipemoraesdesign.bookbinder</string>
   <key>CFBundleExecutable</key>
-  <string>Bookbinder</string>
+  <string>Miolo</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>

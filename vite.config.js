@@ -4,7 +4,7 @@ import injectHTML from 'vite-plugin-html-inject';
 
 export default defineConfig({
   // this fork's GitHub Pages path; the upstream default made plain builds load the upstream site's assets
-  base: process.env.BASE || '/bookbinder/',
+  base: process.env.BASE || '/miolo/',
   test: {
     environment: 'jsdom',
   },

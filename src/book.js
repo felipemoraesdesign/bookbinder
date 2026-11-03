@@ -350,7 +350,7 @@ export class Book {
       this.inputpdf
         .replace(/\.pdf$/i, '')
         .replace(/[\\/:*?"<>|]+/g, '-')
-        .trim() || 'Bookbinder';
+        .trim() || 'Miolo';
 
     if (
       this.format == 'perfect' ||
@@ -695,7 +695,7 @@ export class Book {
    */
   async addPdf(path, pdf) {
     pdf.setTitle(path.split('/').pop());
-    pdf.setCreator('Bookbinder');
+    pdf.setCreator('Miolo');
     pdf.setSubject(`${i18n.t('out_settings_link')} ${window.location.href}`);
     this.zip.file(`${path}.pdf`, await pdf.save());
     this.filelist.push(`${path}.pdf`);

@@ -1,6 +1,6 @@
-# Bookbinder
+# Miolo
 
-Imposição de páginas para encadernação. Você envia um PDF, escolhe o formato e baixa o arquivo pronto para imprimir, dobrar e costurar. Tudo roda no seu computador: o PDF não é enviado a nenhum servidor.
+Imposição de páginas para encadernação. Miolo é o bloco de páginas do livro antes da capa, que é o que o app prepara. Você envia um PDF, escolhe o formato e baixa o arquivo pronto para imprimir, dobrar e costurar. Tudo roda no seu computador: o PDF não é enviado a nenhum servidor.
 
 Este é um fork do [bookbinder-js](https://github.com/momijizukamori/bookbinder-js), com a interface redesenhada, em português e inglês, e um app nativo para Mac.
 
@@ -8,7 +8,7 @@ Este é um fork do [bookbinder-js](https://github.com/momijizukamori/bookbinder-
 
 ## Usar
 
-- **No navegador:** [felipemoraesdesign.github.io/bookbinder](https://felipemoraesdesign.github.io/bookbinder/)
+- **No navegador:** [felipemoraesdesign.github.io/miolo](https://felipemoraesdesign.github.io/miolo/)
 - **No Mac:** gere o app com as instruções em [App para Mac](#app-para-mac).
 
 Para escolher o tamanho do papel de acordo com o formato, veja o [guia de tamanhos](https://docs.google.com/spreadsheets/d/1Qi9Qlbd4QBj6lErnFaRe8rdBsrX0tD7cWf0iOW1V0Vs/edit#gid=0) feito pela comunidade do projeto original.
@@ -35,20 +35,20 @@ npm install
 npm run dev
 ```
 
-O app abre em http://localhost:5173/bookbinder/ e recarrega sozinho a cada mudança.
+O app abre em http://localhost:5173/miolo/ e recarrega sozinho a cada mudança.
 
-| Comando                | O que faz                                                 |
-| ---------------------- | --------------------------------------------------------- |
-| `npm run dev`          | Servidor de desenvolvimento                               |
-| `npm run build`        | Gera o site na pasta `dist`                               |
-| `npm run preview`      | Serve a pasta `dist` em http://localhost:4173/bookbinder/ |
-| `npm run test`         | Todos os testes, refeitos a cada mudança                  |
-| `npm run test:unit`    | Só os testes rápidos, de `src`                            |
-| `npm run test:pdf`     | Só os testes de PDF, mais lentos                          |
-| `npm run lint`         | Confere o estilo do código com o ESLint                   |
-| `npm run lint:fix`     | Corrige o que o ESLint consegue corrigir sozinho          |
-| `npm run prettier`     | Confere a formatação com o Prettier                       |
-| `npm run prettier:fix` | Formata os arquivos com o Prettier                        |
+| Comando                | O que faz                                            |
+| ---------------------- | ---------------------------------------------------- |
+| `npm run dev`          | Servidor de desenvolvimento                          |
+| `npm run build`        | Gera o site na pasta `dist`                          |
+| `npm run preview`      | Serve a pasta `dist` em http://localhost:4173/miolo/ |
+| `npm run test`         | Todos os testes, refeitos a cada mudança             |
+| `npm run test:unit`    | Só os testes rápidos, de `src`                       |
+| `npm run test:pdf`     | Só os testes de PDF, mais lentos                     |
+| `npm run lint`         | Confere o estilo do código com o ESLint              |
+| `npm run lint:fix`     | Corrige o que o ESLint consegue corrigir sozinho     |
+| `npm run prettier`     | Confere a formatação com o Prettier                  |
+| `npm run prettier:fix` | Formata os arquivos com o Prettier                   |
 
 Para sair dos comandos que continuam rodando (`dev`, `preview` e `test`), digite `q` e Enter.
 
@@ -62,12 +62,12 @@ Precisa do Node.js e das ferramentas de linha de comando do Xcode (`xcode-select
 sh macos/build.sh
 ```
 
-O app fica em `macos/build/Bookbinder.app`. Ele tem cerca de 3 MB, roda em Macs com Apple silicon e Intel e pede macOS 12 ou mais novo. Em Bookbinder → Ajustes (⌘,) dá para escolher o idioma, onde salvar os arquivos e se eles abrem ao terminar o download.
+O app fica em `macos/build/Miolo.app`. Ele tem cerca de 3 MB, roda em Macs com Apple silicon e Intel e pede macOS 12 ou mais novo. Em Miolo → Ajustes (⌘,) dá para escolher o idioma, o tema, onde salvar os arquivos e se eles abrem ao terminar o download.
 
 Para testar o app de ponta a ponta (enviar um PDF, gerar a imposição e baixar o arquivo):
 
 ```bash
-macos/build/Bookbinder.app/Contents/MacOS/Bookbinder --self-test docs/example_page_numbers.pdf
+macos/build/Miolo.app/Contents/MacOS/Miolo --self-test docs/example_page_numbers.pdf
 ```
 
 O app gerado tem uma assinatura local e abre só no Mac em que foi gerado. Para distribuir para outras pessoas, ele precisa ser assinado com um certificado Developer ID e notarizado pela Apple.
@@ -81,7 +81,7 @@ O app gerado tem uma assinatura local e abre só no Mac em que foi gerado. Para 
 O site e o app para Mac usam a mesma versão, a do `package.json`. Cada versão publicada ganha uma tag `vX.Y.Z` e uma Release no GitHub com o app compactado em anexo:
 
 ```bash
-ditto -c -k --keepParent macos/build/Bookbinder.app Bookbinder-mac.zip
+ditto -c -k --keepParent macos/build/Miolo.app Miolo-mac.zip
 ```
 
 ## Publicar o site
@@ -92,10 +92,11 @@ Para publicar à mão:
 
 ```bash
 npm run build
-git worktree add ../bookbinder-pages gh-pages
-cd ../bookbinder-pages && git rm -rq . && cp -R ../bookbinder/dist/. . && touch .nojekyll
-git add -A && git commit -m "Publica o site" && git push origin gh-pages
-cd ../bookbinder && git worktree remove ../bookbinder-pages
+git worktree add ../miolo-pages gh-pages
+git -C ../miolo-pages rm -rq .
+cp -R dist/. ../miolo-pages/ && touch ../miolo-pages/.nojekyll
+git -C ../miolo-pages add -A && git -C ../miolo-pages commit -m "Publica o site"
+git -C ../miolo-pages push origin gh-pages && git worktree remove ../miolo-pages
 ```
 
 ## Docker
@@ -104,7 +105,7 @@ O [`compose.yaml`](compose.yaml) gera o site e o serve com nginx, sem abrir port
 
 ```yaml
 services:
-  bookbinder-nginx:
+  miolo-nginx:
     ports:
       - '80:80'
 ```
@@ -113,4 +114,4 @@ services:
 
 A lógica de imposição é do [bookbinder-js](https://github.com/momijizukamori/bookbinder-js), de momijizukamori e [colaboradores](https://github.com/momijizukamori/bookbinder-js/graphs/contributors), que por sua vez reescreveu o [Bookbinder](http://quantumelephant.co.uk/bookbinder/bookbinder.html) original usando a biblioteca [pdf-lib](https://pdf-lib.js.org).
 
-Como o projeto original, este fork usa a [Mozilla Public License 2.0](LICENSE).
+Como o projeto original, este fork usa a [Mozilla Public License 2.0](LICENSE). O nome Miolo é só deste fork; o app não é a versão oficial do Bookbinder nem do bookbinder-js.

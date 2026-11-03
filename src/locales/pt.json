@@ -1,5 +1,5 @@
 {
-  "app_title": "Bookbinder JS",
+  "app_title": "Miolo",
   "intro_desc": "Um aplicativo JavaScript para formatação de PDFs para encadernação -- um processo chamado imposição. Para mais informações, pedidos de recursos ou para contribuir, veja o ",
   "intro_repo_link": "Código no GitHub",
   "current_version": "versão atual:",
@@ -202,7 +202,7 @@
   "out_front": "frente",
   "out_back": "verso",
   "out_settings_file": "configurações",
-  "out_settings_link": "Gerado pelo Bookbinder. Para gerar de novo com as mesmas configurações, abra:",
+  "out_settings_link": "Gerado pelo Miolo. Para gerar de novo com as mesmas configurações, abra:",
   "presets_title": "Predefinições",
   "preset_save": "Salvar atual",
   "presets_empty": "Salve as configurações que você mais usa para trocar de formato com um clique.",

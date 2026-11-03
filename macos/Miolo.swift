@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-// Native macOS shell for Bookbinder: a window around the same web app the site serves,
+// Native macOS shell for Miolo: a window around the same web app the site serves,
 // rendered by the system's WebKit. The imposition engine stays in JavaScript.
 
 import AppKit
@@ -41,7 +41,7 @@ final class AppWebView: WKWebView {
   }
 }
 
-/// The app's own settings (Bookbinder > Settings), kept in UserDefaults. Settings for a book stay in the page.
+/// The app’s own settings (Miolo > Settings), kept in UserDefaults. Settings for a book stay in the page.
 enum Preferences {
   /// "system", "pt" or "en"
   static var language: String { UserDefaults.standard.string(forKey: "language") ?? "system" }
@@ -107,7 +107,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
 {
   var window: NSWindow!
   var webView: AppWebView!
-  /// `Bookbinder --self-test file.pdf`: runs upload → generate → download, saving to a temp folder.
+  /// `Miolo --self-test file.pdf`: runs upload → generate → download, saving to a temp folder.
   let selfTestPDF = CommandLine.arguments.firstIndex(of: "--self-test").map {
     URL(fileURLWithPath: CommandLine.arguments[$0 + 1])
   }
@@ -141,7 +141,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       contentRect: NSRect(x: 0, y: 0, width: 1280, height: 820),
       styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
       backing: .buffered, defer: false)
-    window.title = "Bookbinder"
+    window.title = "Miolo"
     window.titleVisibility = .hidden
     window.titlebarAppearsTransparent = true
     window.backgroundColor = paperColor
@@ -152,6 +152,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     window.makeKeyAndOrderFront(nil)
     NSApp.activate(ignoringOtherApps: true)
 
+    // The host keeps the app’s old name: it is the origin the saved settings and presets belong to.
     webView.load(URLRequest(url: URL(string: "app://bookbinder/")!))
     if selfTestPDF != nil {
       DispatchQueue.main.asyncAfter(deadline: .now() + 60) { self.finishSelfTest("FAIL timed out") }
@@ -320,7 +321,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
             let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds)
           else { return }
           view.cacheDisplay(in: view.bounds, to: rep)
-          let png = FileManager.default.temporaryDirectory.appendingPathComponent("bookbinder-settings-\(index).png")
+          let png = FileManager.default.temporaryDirectory.appendingPathComponent("miolo-settings-\(index).png")
           try? rep.representation(using: .png, properties: [:])?.write(to: png)
           print("settings: \(window.title) \(png.path)")
         }
@@ -463,7 +464,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       icon.widthAnchor.constraint(equalToConstant: 72), icon.heightAnchor.constraint(equalToConstant: 72),
     ])
 
-    let name = NSTextField(labelWithString: "Bookbinder")
+    let name = NSTextField(labelWithString: "Miolo")
     name.font = .boldSystemFont(ofSize: 15)
     let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
     let versionLabel = NSTextField(labelWithString: localized("Versão \(version)", "Version \(version)"))
@@ -486,7 +487,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
           (". All of the imposition logic comes from their work.", nil),
         ], size: 12)
     let code = linkedLabel(
-      [(localized("Ver o código no GitHub", "See the code on GitHub"), "https://github.com/felipemoraesdesign/bookbinder")],
+      [(localized("Ver o código no GitHub", "See the code on GitHub"), "https://github.com/felipemoraesdesign/miolo")],
       size: 12)
     let license = linkedLabel(
       [
@@ -615,13 +616,13 @@ func makeMainMenu() -> NSMenu {
     return item
   }
   let main = NSMenu()
-  main.addItem(menu("Bookbinder", [
-    (localized("Sobre o Bookbinder", "About Bookbinder"), #selector(AppDelegate.showAbout(_:)), ""),
+  main.addItem(menu("Miolo", [
+    (localized("Sobre o Miolo", "About Miolo"), #selector(AppDelegate.showAbout(_:)), ""),
     ("", nil, ""),
     (localized("Ajustes…", "Settings…"), #selector(AppDelegate.showSettings(_:)), ","),
     ("", nil, ""),
-    (localized("Ocultar Bookbinder", "Hide Bookbinder"), #selector(NSApplication.hide(_:)), "h"),
-    (localized("Sair do Bookbinder", "Quit Bookbinder"), #selector(NSApplication.terminate(_:)), "q"),
+    (localized("Ocultar Miolo", "Hide Miolo"), #selector(NSApplication.hide(_:)), "h"),
+    (localized("Sair do Miolo", "Quit Miolo"), #selector(NSApplication.terminate(_:)), "q"),
   ]))
   // Without an Edit menu, Cmd+C / Cmd+V do nothing in the page's text fields.
   main.addItem(menu(localized("Editar", "Edit"), [
