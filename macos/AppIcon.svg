@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <!-- Source for AppIcon.icns: a quarter-bound book in bookcloth, the B mark stamped in warm cream on the cover -->
+  <!-- Source for AppIcon.icns: a quarter-bound book in bookcloth, the M mark stamped in warm cream on the cover -->
   <defs>
     <clipPath id="tile"><rect x="100" y="100" width="824" height="824" rx="185" /></clipPath>
     <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1">
@@ -62,8 +62,8 @@
       filter="url(#stamp)"
       fill="url(#foil)"
       fill-rule="evenodd"
-      transform="translate(586 512) scale(2.15) translate(-129.5 -128)"
-      d="M52 28H124A49 49 0 0 1 164.025 105.267A63 63 0 0 1 144 228H52Z M76 52H124A25 25 0 0 1 124 102H76Z M76 126H144A39 39 0 0 1 144 204H76Z M76 155H148A10 10 0 0 1 148 175H76Z"
+      transform="translate(586 524) scale(2.25) translate(-128 -128)"
+      d="M39 228A1 1 0 0 1 38 227L38 29A1 1 0 0 1 39 28L71.35 28A1 1 0 0 1 72.26 28.59L124.41 145.72A1 1 0 0 1 124.5 146.13L124.5 196.04A3 3 0 0 1 118.73 197.19L67.77 73.63A3 3 0 0 0 62 74.77L62 227A1 1 0 0 1 61 228Z M195 228A1 1 0 0 1 194 227L194 74.77A3 3 0 0 0 188.23 73.63L137.27 197.19A3 3 0 0 1 131.5 196.04L131.5 146.13A1 1 0 0 1 131.59 145.72L183.74 28.59A1 1 0 0 1 184.65 28L217 28A1 1 0 0 1 218 29L218 227A1 1 0 0 1 217 228Z"
     />
   </g>
 </svg>
