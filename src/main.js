@@ -3,7 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import { Book } from './book.js';
-import { loadForm } from './utils/formUtils.js';
+import { fromFormToConfiguration, loadForm } from './utils/formUtils.js';
 import { handleFileChange, handleInputChange } from './utils/changeHandlers.js';
 import {
   handleGenerateClick,
@@ -13,7 +13,8 @@ import {
   renderDownloadNote,
   setLabel,
 } from './utils/clickHandlers.js';
-import { renderPaperSelectOptions } from './utils/renderUtils.js';
+import { renderFormFromSettings, renderPaperSelectOptions } from './utils/renderUtils.js';
+import { setupPresets } from './utils/presets.js';
 import { pageRangeError } from './utils/pageRange.js';
 import { i18n } from './i18n.js';
 
@@ -69,7 +70,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   const pageRange = document.getElementById('page_range');
   const pageRangeHelp = document.getElementById('page_range_help');
   const setupSummary = document.getElementById('setup_summary');
-  const inputs = document.querySelectorAll('input, select');
+  // the preset name field is not a setting
+  const inputs = document.querySelectorAll('input:not(.preset-name), select');
   const sourceRotation = document.getElementById('source_rotation');
   const sewingMarks = document.getElementById('add_sewing_marks_checkbox');
   const sourceRotationExamples = Array.from(
@@ -95,6 +97,17 @@ window.addEventListener('DOMContentLoaded', async () => {
       .join(', ');
   };
 
+  const renderPresets = setupPresets({
+    read: () => fromFormToConfiguration(new FormData(bookbinderForm)),
+    apply: (settings) => {
+      // the page range stays, since it belongs to the PDF on screen
+      renderFormFromSettings({ ...settings, pageRange: pageRange.value });
+      handleInputChange(book, bookbinderForm);
+      renderSetupSummary();
+    },
+    suggestName: describeSetup,
+  });
+
   // Returning users see the setup their next PDF will get, so they can drop it without opening the panel.
   const renderSetupSummary = () => {
     setupSummary.textContent = `${i18n.t('setup_current')} ${describeSetup()}`;
@@ -103,6 +116,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       printFile: bookbinderForm.elements.print_file.value,
       printerType: checked('printer_type')?.value,
     });
+    renderPresets();
   };
 
   const validatePageRange = () => {

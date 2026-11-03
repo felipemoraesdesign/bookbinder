@@ -18,7 +18,7 @@ import { clearUrlParams, setUrlParams, toUrlParams, updateWindowLocation } from 
  * @param { FormData } form The form to parse into a configuration
  * @returns { import("../models/configuration").Configuration } The configuration
  */
-const fromFormToConfiguration = (form) =>
+export const fromFormToConfiguration = (form) =>
   schema.parse({
     pageRange: form.get('page_range'),
     sourceRotation: form.get('source_rotation'),

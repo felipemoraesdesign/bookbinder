@@ -202,5 +202,13 @@
   "out_front": "front",
   "out_back": "back",
   "out_settings_file": "settings",
-  "out_settings_link": "Made with Bookbinder. To make it again with the same settings, open:"
+  "out_settings_link": "Made with Bookbinder. To make it again with the same settings, open:",
+  "presets_title": "Presets",
+  "preset_save": "Save current",
+  "presets_empty": "Save the settings you use most to switch formats in one click.",
+  "preset_name_label": "Preset name",
+  "preset_confirm": "Save",
+  "preset_cancel": "Cancel",
+  "preset_delete": "Delete {name}",
+  "preset_delete_confirm": "Delete?"
 }

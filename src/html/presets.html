@@ -1,0 +1,29 @@
+<section class="presets" aria-labelledby="presets_title">
+  <div class="presets-head">
+    <h2 class="presets-title" id="presets_title" data-i18n="presets_title">Predefinições</h2>
+    <button type="button" class="link-btn" id="preset_new" data-i18n="preset_save">
+      Salvar atual
+    </button>
+  </div>
+  <div class="preset-form" id="preset_form" hidden>
+    <input
+      type="text"
+      id="preset_name"
+      class="preset-name"
+      maxlength="60"
+      autocomplete="off"
+      data-i18n-tooltip="preset_name_label"
+      aria-label="Nome da predefinição"
+    />
+    <button type="button" class="btn btn-secondary" id="preset_confirm" data-i18n="preset_confirm">
+      Salvar
+    </button>
+    <button type="button" class="link-btn" id="preset_cancel" data-i18n="preset_cancel">
+      Cancelar
+    </button>
+  </div>
+  <ul class="preset-list" id="preset_list"></ul>
+  <p class="hint" id="presets_empty" data-i18n="presets_empty">
+    Salve as configurações que você mais usa para trocar de formato com um clique.
+  </p>
+</section>

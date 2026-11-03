@@ -202,5 +202,13 @@
   "out_front": "frente",
   "out_back": "verso",
   "out_settings_file": "configurações",
-  "out_settings_link": "Gerado pelo Bookbinder. Para gerar de novo com as mesmas configurações, abra:"
+  "out_settings_link": "Gerado pelo Bookbinder. Para gerar de novo com as mesmas configurações, abra:",
+  "presets_title": "Predefinições",
+  "preset_save": "Salvar atual",
+  "presets_empty": "Salve as configurações que você mais usa para trocar de formato com um clique.",
+  "preset_name_label": "Nome da predefinição",
+  "preset_confirm": "Salvar",
+  "preset_cancel": "Cancelar",
+  "preset_delete": "Apagar {name}",
+  "preset_delete_confirm": "Apagar?"
 }

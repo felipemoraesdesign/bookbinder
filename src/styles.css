@@ -907,6 +907,141 @@ body:not([data-state='loaded']) .actionbar {
   text-decoration-color: currentColor;
 }
 
+/* ---------- Presets ---------- */
+
+.presets {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.presets-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.presets-title {
+  margin: 0;
+  font: 500 18px/1.2 var(--font-display);
+}
+
+.preset-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preset-list:empty {
+  display: none;
+}
+
+.preset {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  transition:
+    border-color var(--dur-micro) var(--ease),
+    background var(--dur-micro) var(--ease);
+}
+
+.preset:hover {
+  border-color: var(--line-strong);
+}
+
+.preset-apply {
+  min-width: 0;
+  padding: 8px 2px 8px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink);
+  font: 500 13px/1 var(--font-ui);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.preset-delete {
+  display: grid;
+  place-items: center;
+  flex: none;
+  min-width: 28px;
+  height: 28px;
+  margin-right: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--ink-3);
+  font: 600 12px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    color var(--dur-micro) var(--ease),
+    background var(--dur-micro) var(--ease);
+}
+
+.preset-delete svg {
+  width: 12px;
+  height: 12px;
+}
+
+.preset-delete:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+/* the preset the current settings match */
+.preset:has(.preset-apply[aria-pressed='true']) {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.preset-apply[aria-pressed='true'] {
+  color: var(--accent);
+}
+
+.preset.is-armed {
+  border-color: var(--accent);
+}
+
+.preset.is-armed .preset-delete {
+  padding: 0 10px;
+  color: var(--accent);
+}
+
+.preset.is-new {
+  animation: preset-in var(--dur-short) var(--ease-out);
+}
+
+@keyframes preset-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+.preset-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-form .btn {
+  height: var(--control-h);
+  padding: 0 14px;
+  font-size: 13px;
+}
+
 /* ---------- Inspector panels ---------- */
 
 .panel {
