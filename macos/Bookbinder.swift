@@ -47,6 +47,17 @@ enum Preferences {
   static var language: String { UserDefaults.standard.string(forKey: "language") ?? "system" }
   static var saveToDownloads: Bool { UserDefaults.standard.bool(forKey: "saveToDownloads") }
   static var openWhenDone: Bool { UserDefaults.standard.bool(forKey: "openWhenDone") }
+  /// "system", "light" or "dark"
+  static var theme: String { UserDefaults.standard.string(forKey: "theme") ?? "system" }
+
+  /// The app's appearance; the page's light or dark styles follow it through WebKit.
+  static var appearance: NSAppearance? {
+    switch theme {
+    case "light": return NSAppearance(named: .aqua)
+    case "dark": return NSAppearance(named: .darkAqua)
+    default: return nil  // the system's
+    }
+  }
 
   static var usesPortuguese: Bool {
     language == "system" ? Locale.preferredLanguages.first?.hasPrefix("pt") ?? false : language == "pt"
@@ -60,13 +71,14 @@ func localized(_ portuguese: String, _ english: String) -> String {
 /// The site's top bar (logo, tagline, privacy note, language) has no place in a native window: the Dock
 /// and menu carry the name, and the language comes from Settings. The window controls float over the
 /// page instead, so the top strip makes room for them and moves the window like a title bar would.
+/// The credit under the drop zone moves to Settings > Credits.
 func nativeChromeScript() -> String {
   """
   localStorage.setItem('bookbinder_lang', '\(Preferences.usesPortuguese ? "pt" : "en")');
   const style = document.createElement('style');
   // :root raises specificity: this runs before the page's own stylesheet, which would otherwise win.
   style.textContent = `
-    :root .topbar { display: none; }
+    :root .topbar, :root .credit { display: none; }
     :root .stage { padding-top: 44px; }
     @media (min-width: 961px) { :root .inspector { top: 0; height: 100dvh; } }
   `;
@@ -99,6 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
   }
 
   func applicationDidFinishLaunching(_ notification: Notification) {
+    NSApp.appearance = Preferences.appearance
     let config = WKWebViewConfiguration()
     let web = Bundle.main.resourceURL!.appendingPathComponent("web")
     config.setURLSchemeHandler(BundleSchemeHandler(root: web), forURLScheme: "app")
@@ -269,7 +282,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       localStorage.setItem('bookbinder_selftest', '1');
       document.getElementById('generate').click();
       const bar = document.querySelector('.topbar');
-      return `state=${document.body.dataset.state} sheets=${document.getElementById('total_sheets').textContent} storage=${localStorage.getItem('bookbinder_selftest')} topbar=${getComputedStyle(bar).display} stageTop=${getComputedStyle(document.querySelector('.stage')).paddingTop} lang=${document.documentElement.lang} error=${document.getElementById('file_error').textContent} js=${window.__errors.join(' | ')}`;
+      return `state=${document.body.dataset.state} sheets=${document.getElementById('total_sheets').textContent} storage=${localStorage.getItem('bookbinder_selftest')} topbar=${getComputedStyle(bar).display} credit=${getComputedStyle(document.querySelector('.credit')).display} stageTop=${getComputedStyle(document.querySelector('.stage')).paddingTop} lang=${document.documentElement.lang} dark=${matchMedia('(prefers-color-scheme: dark)').matches} error=${document.getElementById('file_error').textContent} js=${window.__errors.join(' | ')}`;
       """
     webView.callAsyncJavaScript(
       script, arguments: ["b64": data.base64EncodedString(), "name": pdf.lastPathComponent],
@@ -324,6 +337,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
 
   var settingsWindow: NSWindow?
   static let languages = ["system", "pt", "en"]
+  static let themes = ["system", "light", "dark"]
 
   @objc func showSettings(_ sender: Any?) {
     if settingsWindow == nil {
@@ -366,15 +380,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     window.title = pages[selected].0
   }
 
-  /// Language and what happens to a download, aligned to the left.
+  /// Language, theme and what happens to a download, aligned to the left.
   func generalSettingsView() -> NSView {
-    let language = NSPopUpButton()
-    language.addItems(withTitles: [localized("Igual ao sistema", "Same as the system"), "Português", "English"])
-    language.selectItem(at: Self.languages.firstIndex(of: Preferences.language) ?? 0)
-    language.target = self
-    language.action = #selector(languageChanged(_:))
-    // as wide as its longest choice, not the whole column
-    language.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+    let language = popUp(
+      [localized("Sistema", "System"), "Português", "English"],
+      selected: Self.languages.firstIndex(of: Preferences.language), action: #selector(languageChanged(_:)))
+    let theme = popUp(
+      [localized("Sistema", "System"), localized("Claro", "Light"), localized("Escuro", "Dark")],
+      selected: Self.themes.firstIndex(of: Preferences.theme), action: #selector(themeChanged(_:)))
 
     // Radio buttons sharing an action and a superview act as one group.
     let ask = NSButton(
@@ -412,6 +425,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
 
     let grid = NSGridView(views: [
       [NSTextField(labelWithString: localized("Idioma:", "Language:")), language],
+      [NSTextField(labelWithString: localized("Tema:", "Theme:")), theme],
       [NSTextField(labelWithString: localized("Ao baixar:", "Downloads:")), ask],
       [NSGridCell.emptyContentView, downloads],
       [NSGridCell.emptyContentView, open],
@@ -422,15 +436,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     grid.rowAlignment = .firstBaseline
     grid.columnSpacing = 8
     grid.rowSpacing = 8
-    grid.row(at: 1).topPadding = 14
-    grid.row(at: 3).topPadding = 6
+    grid.row(at: 2).topPadding = 14
+    grid.row(at: 4).topPadding = 6
     // the hint's box has no baseline; it sits right under the checkbox
-    grid.row(at: 4).rowAlignment = .none
-    grid.row(at: 4).yPlacement = .top
-    grid.row(at: 4).topPadding = -2
+    grid.row(at: 5).rowAlignment = .none
+    grid.row(at: 5).yPlacement = .top
+    grid.row(at: 5).topPadding = -2
     // hugs its content, so the form sits at the top left instead of stretching to fill the tab
     grid.setContentHuggingPriority(.defaultHigh, for: .vertical)
     grid.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+    // the two menus share a width, so they line up (once both are in the grid)
+    theme.widthAnchor.constraint(equalTo: language.widthAnchor).isActive = true
 
     return page([grid], alignment: .leading)
   }
@@ -529,6 +545,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
     NSApp.mainMenu = makeMainMenu()
     // After this action returns, so the pop-up isn't replaced while it's still handling the click.
     DispatchQueue.main.async { self.buildSettings() }
+  }
+
+  /// A pop-up menu as wide as its longest choice, not the whole column.
+  func popUp(_ titles: [String], selected: Int?, action: Selector) -> NSPopUpButton {
+    let button = NSPopUpButton()
+    button.addItems(withTitles: titles)
+    button.selectItem(at: selected ?? 0)
+    button.target = self
+    button.action = action
+    button.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+    return button
+  }
+
+  @objc func themeChanged(_ sender: NSPopUpButton) {
+    UserDefaults.standard.set(Self.themes[sender.indexOfSelectedItem], forKey: "theme")
+    NSApp.appearance = Preferences.appearance
   }
 
   @objc func saveLocationChanged(_ sender: NSButton) {
