@@ -80,6 +80,8 @@ func nativeChromeScript() -> String {
   style.textContent = `
     :root .topbar, :root .credit { display: none; }
     :root .stage { padding-top: 44px; }
+    /* without the credit below it, the empty drop zone needs its own bottom margin, as wide as the sides */
+    :root body:not([data-state='loaded']) .stage { padding-bottom: clamp(20px, 4vw, 56px); }
     @media (min-width: 961px) { :root .inspector { top: 0; height: 100dvh; } }
   `;
   document.documentElement.append(style);
@@ -269,7 +271,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       for (let i = 0; i < 100 && !document.getElementById('setup_summary').textContent; i++) {
         await new Promise((r) => setTimeout(r, 100));
       }
-      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      // space under the empty drop zone, before the PDF goes in
+      const dropGap = Math.round(innerHeight - document.getElementById('dropzone').getBoundingClientRect().bottom);
+      const bytes =Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
       const dt = new DataTransfer();
       dt.items.add(new File([bytes], name, { type: 'application/pdf' }));
       const input = document.getElementById('input_file');
@@ -282,7 +286,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate, 
       localStorage.setItem('bookbinder_selftest', '1');
       document.getElementById('generate').click();
       const bar = document.querySelector('.topbar');
-      return `state=${document.body.dataset.state} sheets=${document.getElementById('total_sheets').textContent} storage=${localStorage.getItem('bookbinder_selftest')} topbar=${getComputedStyle(bar).display} credit=${getComputedStyle(document.querySelector('.credit')).display} stageTop=${getComputedStyle(document.querySelector('.stage')).paddingTop} lang=${document.documentElement.lang} dark=${matchMedia('(prefers-color-scheme: dark)').matches} error=${document.getElementById('file_error').textContent} js=${window.__errors.join(' | ')}`;
+      return `state=${document.body.dataset.state} sheets=${document.getElementById('total_sheets').textContent} storage=${localStorage.getItem('bookbinder_selftest')} topbar=${getComputedStyle(bar).display} credit=${getComputedStyle(document.querySelector('.credit')).display} stageTop=${getComputedStyle(document.querySelector('.stage')).paddingTop} dropGap=${dropGap} lang=${document.documentElement.lang} dark=${matchMedia('(prefers-color-scheme: dark)').matches} error=${document.getElementById('file_error').textContent} js=${window.__errors.join(' | ')}`;
       """
     webView.callAsyncJavaScript(
       script, arguments: ["b64": data.base64EncodedString(), "name": pdf.lastPathComponent],
