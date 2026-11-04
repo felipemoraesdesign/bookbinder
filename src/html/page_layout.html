@@ -62,23 +62,41 @@
       </div>
 
       <div class="field">
-        <span class="field-label" data-i18n="margins_title">Margens extras (pt)</span>
+        <span class="field-label"
+          ><span data-i18n="margins_title">Margens extras</span> (<span class="unit-label">mm</span
+          >)</span
+        >
         <div class="margin-box">
           <label class="m-top">
-            <input type="number" id="top_edge_padding_pt" name="top_edge_padding_pt" />
+            <input type="number" id="top_edge_padding_pt" name="top_edge_padding_pt" step="any" />
             <span data-i18n="top_margin">Superior</span>
           </label>
           <label class="m-binding">
-            <input type="number" id="binding_edge_padding_pt" name="binding_edge_padding_pt" />
+            <input
+              type="number"
+              id="binding_edge_padding_pt"
+              name="binding_edge_padding_pt"
+              step="any"
+            />
             <span data-i18n="binding_margin">Lombada</span>
           </label>
           <span class="m-page" aria-hidden="true"></span>
           <label class="m-fore">
-            <input type="number" id="main_fore_edge_padding_pt" name="main_fore_edge_padding_pt" />
+            <input
+              type="number"
+              id="main_fore_edge_padding_pt"
+              name="main_fore_edge_padding_pt"
+              step="any"
+            />
             <span data-i18n="fore_edge_margin">Corte</span>
           </label>
           <label class="m-bottom">
-            <input type="number" id="bottom_edge_padding_pt" name="bottom_edge_padding_pt" />
+            <input
+              type="number"
+              id="bottom_edge_padding_pt"
+              name="bottom_edge_padding_pt"
+              step="any"
+            />
             <span data-i18n="bottom_margin">Inferior</span>
           </label>
         </div>

@@ -15,9 +15,12 @@ import {
   setLabel,
 } from './utils/clickHandlers.js';
 import {
+  clearPreview,
   paperName,
   renderCustomSignatureCheck,
   renderInfoBox,
+  renderLayoutThumbnails,
+  renderLengthUnit,
   refreshPageLayoutInfo,
   renderFormFromSettings,
   renderPaperSelectOptions,
@@ -60,11 +63,18 @@ const formatSize = (bytes) => {
 };
 
 window.addEventListener('DOMContentLoaded', async () => {
+  // a touch screen has nothing to drop: the title says to choose instead
+  if (matchMedia('(pointer: coarse)').matches) {
+    document
+      .querySelector('[data-i18n="drop_title"]')
+      ?.setAttribute('data-i18n', 'drop_title_touch');
+  }
   await i18n.init();
   markActiveLanguage(i18n.locale);
 
   // render dynamic content
   renderPaperSelectOptions();
+  renderLayoutThumbnails();
   const configuration = loadForm();
 
   // grab DOM elements
@@ -92,6 +102,27 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   const checked = (name) => bookbinderForm.querySelector(`input[name="${name}"]:checked`);
 
+  // A short preset name, e.g. "Cadernos 4 · A4", with a custom paper's size so two stay apart
+  const describePreset = () => {
+    const format = checked('sig_format');
+    const paper = bookbinderForm.elements.paper_size;
+    return [
+      [
+        format?.closest('.choice')?.querySelector('.choice-title')?.textContent,
+        format?.value === 'standardsig' && bookbinderForm.elements.sig_length.value,
+      ]
+        .filter(Boolean)
+        .join(' '),
+      paper.value === 'CUSTOM'
+        ? paper.selectedOptions[0].label.split(' · ').pop()
+        : paperName(paper.value),
+      checked('printer_type')?.value === 'single' &&
+        checked('printer_type').nextElementSibling.textContent.toLocaleLowerCase(i18n.locale),
+    ]
+      .filter(Boolean)
+      .join(' · ');
+  };
+
   // The setup in a few words, e.g. "Cadernos, 4 folhas cada, A4, frente e verso"
   const describeSetup = () => {
     const format = checked('sig_format');
@@ -114,7 +145,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       refreshPreview(book, handleInputChange(book, bookbinderForm));
       renderSetupSummary();
     },
-    suggestName: describeSetup,
+    suggestName: describePreset,
   });
 
   // Returning users see the setup their next PDF will get, so they can drop it without opening the panel.
@@ -144,6 +175,13 @@ window.addEventListener('DOMContentLoaded', async () => {
   };
   renderSetupSummary();
 
+  // Switching the unit converts what is already typed. Registered before the listeners below, so
+  // the form is read in the new unit with values that still mean the same length.
+  const unitSelect = bookbinderForm.elements.paper_size_unit;
+  unitSelect.addEventListener('change', () =>
+    renderLengthUnit(unitSelect.value, unitSelect.dataset.shown)
+  );
+
   // add event listeners to grabbed elements
   inputs.forEach((input) => {
     input.addEventListener('change', () => {
@@ -152,6 +190,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   });
   pageRange.addEventListener('input', validatePageRange);
+  document.getElementById('preview_close').addEventListener('click', clearPreview);
+  document
+    .getElementById('go_settings')
+    .addEventListener('click', () =>
+      document.querySelector('.inspector').scrollIntoView({ behavior: 'smooth' })
+    );
+
   // the custom signatures field says at once when it can't be read
   bookbinderForm.elements.custom_sig.addEventListener('input', () =>
     renderCustomSignatureCheck(book.neededSheets)

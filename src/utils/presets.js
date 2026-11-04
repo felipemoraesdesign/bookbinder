@@ -83,6 +83,7 @@ export function setupPresets({ read, apply, suggestName }) {
     applyButton.type = 'button';
     applyButton.className = 'preset-apply';
     applyButton.textContent = preset.name;
+    applyButton.title = preset.name;
     applyButton.setAttribute('aria-pressed', matchesPreset(preset, current));
     applyButton.addEventListener('click', () => apply(preset.settings));
 

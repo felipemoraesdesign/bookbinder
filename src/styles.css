@@ -38,8 +38,8 @@
   --shadow-primary: inset 0 1px 0 oklch(1 0 0 / 0.15), 0 6px 16px -6px var(--accent);
   --focus: 0 0 0 3px oklch(0.47 0.15 24 / 0.3);
 
-  --font-ui: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Crimson Pro', 'Iowan Old Style', Georgia, serif;
+  --font-ui: 'Albert Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Literata', 'Iowan Old Style', Georgia, serif;
 
   --r-lg: 14px;
   --r: 8px;
@@ -532,6 +532,19 @@ body[data-state='loaded'] .results {
   margin: 0 0 16px;
 }
 
+.callout-action {
+  color: inherit;
+  font-weight: 600;
+  text-decoration-color: currentColor;
+}
+
+/* downloading now would leave pages out */
+.btn-primary.has-warning {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--warn-ink);
+}
+
 .bookblock {
   display: flex;
   flex-direction: column;
@@ -685,7 +698,7 @@ body[data-state='loaded'] .results {
 .sheet-summary {
   margin: 0;
   max-width: 34ch;
-  font: 400 21px/1.35 var(--font-display);
+  font: 400 19px/1.4 var(--font-display);
   text-wrap: pretty;
 }
 
@@ -776,9 +789,36 @@ body[data-state='loaded'] .results {
   font-weight: 600;
 }
 
-.preview-caption {
-  scroll-margin-top: 72px;
+.preview-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0 0 -8px;
+  scroll-margin-top: 72px;
+}
+
+.actionbar-meta {
+  display: none;
+}
+
+.layout-thumb {
+  flex: none;
+  margin-left: auto;
+  align-self: center;
+  width: auto;
+  height: auto;
+  fill: var(--sheet);
+  stroke: var(--ink-3);
+  stroke-width: 1;
+}
+
+.layout-thumb path {
+  stroke-width: 0.6;
+}
+
+.preview-caption {
+  margin: 0;
   font-size: 13px;
   color: var(--ink-2);
 }
@@ -1799,6 +1839,18 @@ select {
   body[data-state='loaded'] .app {
     padding-bottom: 88px;
   }
+
+  /* the settings sit below the result here: one tap goes back up to them, clear of the header */
+  .inspector {
+    scroll-margin-top: 64px;
+  }
+
+  .actionbar-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-right: auto;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1829,9 +1881,13 @@ select {
     display: none;
   }
 
+  .actionbar-meta {
+    flex-basis: 100%;
+  }
+
   .actionbar-summary {
     display: block;
-    flex-basis: 100%;
+    flex: 1;
     margin: 0;
     font-size: 12.5px;
     color: var(--ink-2);

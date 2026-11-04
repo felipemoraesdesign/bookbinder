@@ -12,14 +12,18 @@ import {
   updatePageLayoutInfo,
 } from './renderUtils';
 import { clearUrlParams, setUrlParams, toUrlParams, updateWindowLocation } from './uri';
+import { toPt } from './units';
 
 /**
  * Parses a Form into a common Configiration.
  * @param { FormData } form The form to parse into a configuration
  * @returns { import("../models/configuration").Configuration } The configuration
  */
-export const fromFormToConfiguration = (form) =>
-  schema.parse({
+export const fromFormToConfiguration = (form) => {
+  // lengths are typed in the chosen unit and kept in pt
+  const unit = form.get('paper_size_unit') ?? 'mm';
+  const length = (name) => toPt(form.get(name), unit);
+  return schema.parse({
     pageRange: form.get('page_range'),
     sourceRotation: form.get('source_rotation'),
     paperSize: form.get('paper_size'),
@@ -34,27 +38,28 @@ export const fromFormToConfiguration = (form) =>
     cutMarks: form.has('cutmarks'),
     pageScaling: form.get('page_scaling'),
     pagePositioning: form.get('page_positioning'),
-    mainForeEdgePaddingPt: form.get('main_fore_edge_padding_pt'),
-    bindingEdgePaddingPt: form.get('binding_edge_padding_pt'),
-    topEdgePaddingPt: form.get('top_edge_padding_pt'),
-    bottomEdgePaddingPt: form.get('bottom_edge_padding_pt'),
+    mainForeEdgePaddingPt: length('main_fore_edge_padding_pt'),
+    bindingEdgePaddingPt: length('binding_edge_padding_pt'),
+    topEdgePaddingPt: length('top_edge_padding_pt'),
+    bottomEdgePaddingPt: length('bottom_edge_padding_pt'),
     sigFormat: form.get('sig_format'),
     sigLength: form.get('sig_length'),
-    customSigLength: form.get('custom_sig'),
-    foreEdgePaddingPt: form.get('fore_edge_padding_pt'),
+    customSigLength: form.get('custom_sig') || undefined,
+    foreEdgePaddingPt: length('fore_edge_padding_pt'),
     wackySpacing: form.get('wacky_spacing'),
     fileDownload: form.get('file_download'),
     printFile: form.get('print_file'),
     flyleafs: form.get('flyleafs'),
-    paperSizeCustomWidth: form.get('paper_size_custom_width'),
-    paperSizeCustomHeight: form.get('paper_size_custom_height'),
+    paperSizeCustomWidth: length('paper_size_custom_width'),
+    paperSizeCustomHeight: length('paper_size_custom_height'),
 
     sewingMarksEnabled: form.has('add_sewing_marks_checkbox'),
     sewingMarkLocation: form.get('sewing_mark_locations'),
-    sewingMarksMarginPt: form.get('sewing_marks_margin_pt'),
+    sewingMarksMarginPt: length('sewing_marks_margin_pt'),
     sewingMarksAmount: form.get('sewing_marks_amount'),
-    sewingMarksTapeWidthPt: form.get('sewing_marks_tape_width_pt'),
+    sewingMarksTapeWidthPt: length('sewing_marks_tape_width_pt'),
   });
+};
 
 /**
  * Sets the configuration to the URL.

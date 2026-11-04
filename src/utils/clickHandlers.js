@@ -106,8 +106,8 @@ function showPrintGuide(book) {
     perfect: 'gather_perfect',
   };
   const steps = [
-    i18n.t('print_actual_size'),
-    i18n.t(book.duplex ? 'print_duplex' : 'print_single'),
+    i18n.t(book.duplex ? 'print_test_duplex' : 'print_test_single'),
+    book.duplex && i18n.t('print_rest'),
     i18n.t(gatherKeys[book.format] ?? 'gather_single_sheet', {
       fold,
       n: book.sigsize,
@@ -117,7 +117,9 @@ function showPrintGuide(book) {
   document
     .getElementById('print_steps')
     .replaceChildren(
-      ...steps.map((text) => Object.assign(document.createElement('li'), { textContent: text }))
+      ...steps
+        .filter(Boolean)
+        .map((text) => Object.assign(document.createElement('li'), { textContent: text }))
     );
   const guide = document.getElementById('print_guide');
   guide.hidden = false;

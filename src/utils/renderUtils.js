@@ -6,6 +6,7 @@ import { PAGE_SIZES } from '../constants';
 import { handleSewingMarksCheckboxState } from './clickHandlers.js';
 import { i18n } from '../i18n.js';
 import { customSignatureError } from './customSignatures.js';
+import { fromPt, LENGTH_FIELDS, toPt } from './units.js';
 
 export function renderPageCount(book) {
   const pageCount = document.getElementById('page_count');
@@ -49,10 +50,33 @@ export function renderInfoBox(book) {
     warning = i18n.t('zine_page_warning', { total: book.pagecount });
   } else if (customCheck?.kind === 'short') {
     warning = i18n.t('custom_sig_short', customCheck);
+  } else if (book.format === 'booklet' && book.neededSheets > 12) {
+    // past a dozen sheets a single fold gets thick, and the inner sheets push out at the edge
+    warning = i18n.t('booklet_thick', { n: book.neededSheets });
   }
   const summaryWarning = document.getElementById('summary_warning');
   summaryWarning.hidden = !warning;
   summaryWarning.textContent = warning;
+  const short = customCheck?.kind === 'short';
+  if (short) {
+    // one click away from a book that prints whole: the missing sheets as one more signature
+    const missing = customCheck.needed - customCheck.sum;
+    const fix = document.createElement('button');
+    fix.type = 'button';
+    fix.className = 'link-btn callout-action';
+    fix.textContent = i18n.t('custom_sig_add', { n: missing });
+    fix.addEventListener('click', () => {
+      const field = document.querySelector('input[name="custom_sig"]');
+      field.value = `${field.value.trim().replace(/,\s*$/, '')}, ${missing}`;
+      field.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    summaryWarning.append(' ', fix);
+  }
+  // the download says it leaves pages out, for eyes and for screen readers
+  const generate = document.getElementById('generate');
+  generate.classList.toggle('has-warning', short);
+  if (short) generate.setAttribute('aria-describedby', 'summary_warning');
+  else generate.removeAttribute('aria-describedby');
 
   // the figures that matter most, kept in the action bar pinned to the bottom of a phone screen
   document.getElementById('action_summary').textContent = [
@@ -62,7 +86,10 @@ export function renderInfoBox(book) {
     .filter(Boolean)
     .join(' · ');
 
-  totalSheets.innerText = book.book.sheets;
+  // custom signatures that fall short print fewer sheets than the pages fill: say how many go out
+  totalSheets.innerText = short
+    ? i18n.t('sheets_of', { sum: customCheck.sum, needed: customCheck.needed })
+    : book.book.sheets;
   sigCount.innerText = book.book.sigconfig.length;
   sigArrange.innerText = book.book.sigconfig.join(', ');
   totalPages.innerText = outputPages;
@@ -210,7 +237,13 @@ export function updatePageLayoutInfo(info) {
   // The numbers that matter, said as a binder would: how many pages share a side, and what
   // happens to their size, so a 350% enlargement is read before printing rather than after.
   const pages = rows * cols;
-  const paper = paperName(document.getElementById('paper_size').value);
+  const paperKey = document.getElementById('paper_size').value;
+  const paper =
+    paperKey === 'CUSTOM'
+      ? i18n.t('paper_custom_sheet', {
+          size: `${mm(PAGE_SIZES.CUSTOM[0], whole)} × ${mm(PAGE_SIZES.CUSTOM[1], whole)} mm`,
+        })
+      : paperName(paperKey);
   let scaleKey = 'sheet_scale_same';
   if (stretched) scaleKey = 'sheet_scale_stretch';
   else if (scaleX > 1.02) scaleKey = 'sheet_scale_up';
@@ -231,6 +264,19 @@ export function updatePageLayoutInfo(info) {
   warning.textContent = i18n.t('sheet_scale_warning', {
     size: decimal.format(10 * Math.min(scaleX, scaleY)),
   });
+  // enlarged pages have a one-click way back to their real size
+  if (scaleX > 1.1 && scaleY > 1.1) {
+    const keepSize = document.createElement('button');
+    keepSize.type = 'button';
+    keepSize.className = 'link-btn callout-action';
+    keepSize.textContent = i18n.t('scale_keep_original');
+    keepSize.addEventListener('click', () => {
+      const scaling = document.querySelector('select[name="page_scaling"]');
+      scaling.value = 'centered';
+      scaling.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    warning.append(' ', keepSize);
+  }
   lastLayoutInfo = info;
 }
 
@@ -281,9 +327,28 @@ export function updatePaperSelectOptionsUnits() {
     group.label = i18n.t(group.dataset.label);
   }
 }
+/**
+ * Shows the measurement fields in `unit`: their unit labels, and (when switching from `from`) the
+ * values already typed, converted so they keep meaning the same length.
+ * @param {string} unit
+ * @param {string} [from] - the unit the fields showed until now
+ */
+export function renderLengthUnit(unit, from) {
+  const form = document.getElementById('bookbinder');
+  if (from && from !== unit) {
+    for (const name of LENGTH_FIELDS) {
+      const field = form.elements[name];
+      if (field.value !== '') field.value = fromPt(toPt(field.value, from), unit);
+    }
+  }
+  for (const label of form.querySelectorAll('.unit-label')) label.textContent = unit;
+  form.elements.paper_size_unit.dataset.shown = unit;
+}
+
 export function updateAddOrRemoveCustomPaperOption() {
-  const width = document.getElementById('paper_size_custom_width').value;
-  const height = document.getElementById('paper_size_custom_height').value;
+  const unit = document.getElementById('paper_size_unit').value;
+  const width = toPt(document.getElementById('paper_size_custom_width').value, unit);
+  const height = toPt(document.getElementById('paper_size_custom_height').value, unit);
   const paperList = document.getElementById('paper_size');
   // a 0 or blank side would lay the pages out as NaN
   const validDimensions = Number(width) > 0 && Number(height) > 0;
@@ -328,6 +393,40 @@ export function renderPaperSelectOptions() {
  * The single-sheet layouts pad their pages as folios: while one is chosen, the book-size choice
  * leaves the form (its panel is hidden by CSS) and comes back unchanged when a classic format is.
  */
+// Pages per face of each single-sheet layout, [rows, columns, landscape], as the imposition lays them
+const SINGLE_SHEET_GRIDS = {
+  '8_zine': [2, 4, false],
+  '1_3rd': [3, 2, false],
+  A7_2_16s: [4, 4, false],
+  a_3_6s: [3, 6, true],
+  a9_3_3_4: [5, 4, false],
+  a_4_8s: [4, 8, true],
+  a10_6_10s: [6, 10, true],
+};
+
+/** Draws each single-sheet layout's grid on its card, so they can be told apart at a glance. */
+export function renderLayoutThumbnails() {
+  for (const [format, [rows, cols, landscape]] of Object.entries(SINGLE_SHEET_GRIDS)) {
+    const [width, height] = landscape ? [42, 30] : [30, 42];
+    const lines = [
+      ...Array.from({ length: cols - 1 }, (_, i) => {
+        const x = ((i + 1) * width) / cols;
+        return `<path d="M${x} 0V${height}"/>`;
+      }),
+      ...Array.from({ length: rows - 1 }, (_, i) => {
+        const y = ((i + 1) * height) / rows;
+        return `<path d="M0 ${y}H${width}"/>`;
+      }),
+    ].join('');
+    document
+      .querySelector(`label.choice[for="${format}"]`)
+      ?.insertAdjacentHTML(
+        'beforeend',
+        `<svg class="layout-thumb" viewBox="-1 -1 ${width + 2} ${height + 2}" width="${width + 2}" height="${height + 2}" aria-hidden="true"><rect width="${width}" height="${height}" rx="1"/>${lines}</svg>`
+      );
+  }
+}
+
 export function renderWacky() {
   const isWacky = Boolean(document.querySelector('.wacky input[name="sig_format"]:checked'));
   document.querySelectorAll('#book_size input').forEach((input) => {
@@ -337,6 +436,8 @@ export function renderWacky() {
 
 /** @param { import("../models/configuration").Configuration } configuration */
 export function renderFormFromSettings(configuration) {
+  // lengths are kept in pt and shown in the chosen unit
+  const unit = configuration.paperSizeUnit;
   // Clear all checked attributes
   document.querySelectorAll('[type=radio]').forEach((e) => {
     e.checked = false;
@@ -383,24 +484,38 @@ export function renderFormFromSettings(configuration) {
     configuration.sewingMarksEnabled;
   document.querySelector('select[name="sewing_mark_locations"]').value =
     configuration.sewingMarkLocation;
-  document.querySelector('input[name="sewing_marks_margin_pt"]').value =
-    configuration.sewingMarksMarginPt;
+  document.querySelector('input[name="sewing_marks_margin_pt"]').value = fromPt(
+    configuration.sewingMarksMarginPt,
+    unit
+  );
   document.querySelector('input[name="sewing_marks_amount"]').value =
     configuration.sewingMarksAmount;
-  document.querySelector('input[name="sewing_marks_tape_width_pt"]').value =
-    configuration.sewingMarksTapeWidthPt;
+  document.querySelector('input[name="sewing_marks_tape_width_pt"]').value = fromPt(
+    configuration.sewingMarksTapeWidthPt,
+    unit
+  );
 
   // Set freeform inputs
-  document.querySelector('input[name="main_fore_edge_padding_pt"]').value =
-    configuration.mainForeEdgePaddingPt;
-  document.querySelector('input[name="binding_edge_padding_pt"]').value =
-    configuration.bindingEdgePaddingPt;
-  document.querySelector('input[name="top_edge_padding_pt"]').value =
-    configuration.topEdgePaddingPt;
-  document.querySelector('input[name="bottom_edge_padding_pt"]').value =
-    configuration.bottomEdgePaddingPt;
-  document.querySelector('input[name="fore_edge_padding_pt"]').value =
-    configuration.foreEdgePaddingPt;
+  document.querySelector('input[name="main_fore_edge_padding_pt"]').value = fromPt(
+    configuration.mainForeEdgePaddingPt,
+    unit
+  );
+  document.querySelector('input[name="binding_edge_padding_pt"]').value = fromPt(
+    configuration.bindingEdgePaddingPt,
+    unit
+  );
+  document.querySelector('input[name="top_edge_padding_pt"]').value = fromPt(
+    configuration.topEdgePaddingPt,
+    unit
+  );
+  document.querySelector('input[name="bottom_edge_padding_pt"]').value = fromPt(
+    configuration.bottomEdgePaddingPt,
+    unit
+  );
+  document.querySelector('input[name="fore_edge_padding_pt"]').value = fromPt(
+    configuration.foreEdgePaddingPt,
+    unit
+  );
   document.querySelector('input[name="flyleafs"]').value = configuration.flyleafs;
   document.querySelector('input[name="page_range"]').value = configuration.pageRange;
 
@@ -412,7 +527,8 @@ export function renderFormFromSettings(configuration) {
   document.querySelector('select[name="page_positioning"]').value = configuration.pagePositioning;
   document.querySelector('select[name="print_file"]').value = configuration.printFile;
   document.querySelector('select[name="paper_size"]').value = configuration.paperSize;
-  document.querySelector('select[name="paper_size_unit"]').value = configuration.paperSizeUnit;
+  document.querySelector('select[name="paper_size_unit"]').value = unit;
+  renderLengthUnit(unit);
   document.querySelector(
     `input[name="printer_type"][value="${configuration.printerType}"]`
   ).checked = true;
@@ -423,10 +539,14 @@ export function renderFormFromSettings(configuration) {
     configuration.paperSizeCustomHeight !== undefined &&
     configuration.paperSizeCustomWidth !== undefined
   ) {
-    document.querySelector('input[name="paper_size_custom_height"]').value =
-      configuration.paperSizeCustomHeight;
-    document.querySelector('input[name="paper_size_custom_width"]').value =
-      configuration.paperSizeCustomWidth;
+    document.querySelector('input[name="paper_size_custom_height"]').value = fromPt(
+      configuration.paperSizeCustomHeight,
+      unit
+    );
+    document.querySelector('input[name="paper_size_custom_width"]').value = fromPt(
+      configuration.paperSizeCustomWidth,
+      unit
+    );
     updateAddOrRemoveCustomPaperOption();
     updatePaperSelectOptionsUnits();
     document.querySelector('select[name="paper_size"]').value = 'CUSTOM';
@@ -468,6 +588,6 @@ export function showInPreviewFrame(frame, url) {
 export function clearPreview() {
   const previewFrame = document.getElementById('pdf');
   previewFrame.style.display = 'none';
-  document.getElementById('preview_caption').hidden = true;
+  document.getElementById('preview_head').hidden = true;
   showInPreviewFrame(previewFrame, 'about:blank');
 }

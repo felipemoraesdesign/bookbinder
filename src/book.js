@@ -518,10 +518,10 @@ export class Book {
       URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }))
     );
     previewFrame.style.display = '';
-    const caption = document.getElementById('preview_caption');
-    caption.textContent = this.previewCaption();
-    caption.hidden = false;
-    if (scroll) caption.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('preview_caption').textContent = this.previewCaption();
+    const head = document.getElementById('preview_head');
+    head.hidden = false;
+    if (scroll) head.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /** Says which part of the book the preview shows: only the first signature is imposed for it. */

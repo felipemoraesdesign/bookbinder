@@ -140,7 +140,12 @@
     <ol class="print-steps" id="print_steps"></ol>
   </section>
 
-  <p class="preview-caption" id="preview_caption" hidden></p>
+  <div class="preview-head" id="preview_head" hidden>
+    <p class="preview-caption" id="preview_caption"></p>
+    <button type="button" class="link-btn" id="preview_close" data-i18n="preview_close">
+      Fechar prévia
+    </button>
+  </div>
   <iframe
     id="pdf"
     title="Pré-visualização"
@@ -150,7 +155,10 @@
 </div>
 
 <div class="actionbar">
-  <p class="actionbar-summary" id="action_summary" aria-hidden="true"></p>
+  <div class="actionbar-meta">
+    <p class="actionbar-summary" id="action_summary" aria-hidden="true"></p>
+    <button type="button" class="link-btn" id="go_settings" data-i18n="go_settings">Ajustes</button>
+  </div>
   <p class="actionbar-note" id="action_note" data-i18n="download_note" aria-live="polite">
     Você recebe um .zip com os arquivos prontos para imprimir.
   </p>

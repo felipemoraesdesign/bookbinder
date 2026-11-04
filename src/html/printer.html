@@ -30,7 +30,7 @@
       <summary data-i18n="more_paper_options">Mais opções de papel</summary>
       <div class="more-body">
         <label class="field" for="paper_size_unit">
-          <span class="field-label" data-i18n="paper_size_unit">Unidade na lista de papéis</span>
+          <span class="field-label" data-i18n="paper_size_unit">Unidade de medida</span>
           <select name="paper_size_unit" id="paper_size_unit">
             <option data-i18n="unit_mm" value="mm">Milímetros</option>
             <option data-i18n="unit_pt" value="pt">Pontos</option>
@@ -40,12 +40,18 @@
         </label>
 
         <div class="field">
-          <span class="field-label" data-i18n="dimensions_custom">Tamanho personalizado (pt)</span>
+          <span class="field-label"
+            ><span data-i18n="dimensions_custom">Tamanho personalizado</span> (<span
+              class="unit-label"
+              >mm</span
+            >)</span
+          >
           <div class="pair">
             <input
               type="number"
               id="paper_size_custom_width"
               name="paper_size_custom_width"
+              step="any"
               data-i18n-placeholder="width"
               placeholder="Largura"
             />
@@ -54,6 +60,7 @@
               type="number"
               id="paper_size_custom_height"
               name="paper_size_custom_height"
+              step="any"
               data-i18n-placeholder="height"
               placeholder="Altura"
             />

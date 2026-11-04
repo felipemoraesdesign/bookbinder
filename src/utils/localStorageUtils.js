@@ -6,8 +6,14 @@ const STORAGE_KEY = 'bookbinderSettings';
 
 export function getLocalSettings() {
   const emptySettings = {};
-  const localSettings = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  if (!localSettings) {
+  let localSettings;
+  try {
+    localSettings = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  } catch {
+    // unreadable storage would stop the app from opening: start from the defaults instead
+    localSettings = null;
+  }
+  if (!localSettings || typeof localSettings !== 'object') {
     setLocalSettings(emptySettings);
     return getLocalSettings();
   }
