@@ -21,8 +21,8 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&display=swap"
     />
-    <script type="module" crossorigin src="/miolo/assets/index-3zq0J1Ta.js"></script>
-    <link rel="stylesheet" crossorigin href="/miolo/assets/index-Cykfl4Ka.css">
+    <script type="module" crossorigin src="/miolo/assets/index-XakNE49u.js"></script>
+    <link rel="stylesheet" crossorigin href="/miolo/assets/index-BKvLfPRb.css">
   </head>
 
   <body data-state="empty">
@@ -106,6 +106,7 @@
     <h2 class="section-title" id="summary_title" data-i18n="summary_title">
       Seu livro em cadernos
     </h2>
+    <p class="callout callout-warn" id="zine_page_warning" hidden></p>
     <figure class="bookblock">
       <div class="bookblock-row" id="sig_visual" aria-hidden="true"></div>
       <figcaption>
@@ -144,43 +145,50 @@
           <div class="stripes_pdf" id="pdf_on_page_layout_preview"></div>
         </div>
       </div>
-      <dl class="sheet-legend" id="layout_margin_info">
-        <div>
-          <dt><i class="swatch swatch-paper"></i><span data-i18n="layout">Grade da folha</span></dt>
-          <dd id="page_grid_layout"></dd>
-        </div>
-        <div>
-          <dt>
-            <i class="swatch swatch-paper"></i
-            ><span data-i18n="max_page_size">Espaço por página</span>
-          </dt>
-          <dd id="page_grid_dimensions"></dd>
-        </div>
-        <div>
-          <dt><i class="swatch swatch-pdf"></i><span data-i18n="source">PDF original</span></dt>
-          <dd id="pdf_source_dimensions"></dd>
-        </div>
-        <div>
-          <dt><i class="swatch swatch-pdf"></i><span data-i18n="on_page">Na folha</span></dt>
-          <dd id="pdf_page_dimensions"></dd>
-        </div>
-        <div>
-          <dt data-i18n="scaling">Escala</dt>
-          <dd id="pdf_scale_dimensions"></dd>
-        </div>
-        <div>
-          <dt data-i18n="rotated">Rotacionada</dt>
-          <dd id="pdf_page_rotation_info"></dd>
-        </div>
-        <div class="span-2">
-          <dt data-i18n="offset">Deslocamento</dt>
-          <dd id="pdf_offset_dimensions"></dd>
-        </div>
-        <p class="span-2 muted" data-i18n="all_dims_pts">Medidas em pontos (1 pt = 1/72 pol.)</p>
-      </dl>
+      <div class="sheet-info">
+        <p class="sheet-summary" id="sheet_summary"></p>
+        <p class="callout callout-warn" id="sheet_scale_warning" hidden></p>
+        <details class="sheet-details">
+          <summary data-i18n="sheet_details">Medidas</summary>
+          <dl class="sheet-legend" id="layout_margin_info">
+            <div>
+              <dt data-i18n="layout">Grade da folha</dt>
+              <dd id="page_grid_layout"></dd>
+            </div>
+            <div>
+              <dt>
+                <i class="swatch swatch-paper"></i
+                ><span data-i18n="max_page_size">Espaço por página</span>
+              </dt>
+              <dd id="page_grid_dimensions"></dd>
+            </div>
+            <div>
+              <dt><i class="swatch swatch-pdf"></i><span data-i18n="source">PDF original</span></dt>
+              <dd id="pdf_source_dimensions"></dd>
+            </div>
+            <div>
+              <dt><i class="swatch swatch-pdf"></i><span data-i18n="on_page">Na folha</span></dt>
+              <dd id="pdf_page_dimensions"></dd>
+            </div>
+            <div>
+              <dt data-i18n="scaling">Escala</dt>
+              <dd id="pdf_scale_dimensions"></dd>
+            </div>
+            <div>
+              <dt data-i18n="rotated">Rotacionada</dt>
+              <dd id="pdf_page_rotation_info"></dd>
+            </div>
+            <div class="span-2">
+              <dt data-i18n="offset">Deslocamento</dt>
+              <dd id="pdf_offset_dimensions"></dd>
+            </div>
+          </dl>
+        </details>
+      </div>
     </div>
   </section>
 
+  <p class="preview-caption" id="preview_caption" hidden></p>
   <iframe
     id="pdf"
     title="Pré-visualização"
@@ -325,6 +333,175 @@
       </label>
     </div>
 
+    <details class="nested wacky" id="single_sheet">
+  <summary data-i18n="wacky_small_layouts">Folha única: zines e miniaturas</summary>
+  <div class="more-body">
+    <p class="callout" data-i18n="wacky_warn">
+      These layouts contain one or more signature per printed page.
+    </p>
+
+    <div class="choices choices-compact" role="radiogroup">
+      <div class="choice-wrap">
+        <label class="choice" for="8_zine">
+          <input type="radio" id="8_zine" name="sig_format" value="8_zine" />
+          <span class="choice-body">
+            <span class="choice-title" data-i18n="sig_8_zine">Zine de folha única</span>
+            <span class="choice-desc" data-i18n="sig_8_zine_small"
+              >(one sided printed page foldup)</span
+            >
+          </span>
+        </label>
+        <details class="note">
+          <summary data-i18n="instructions">Instruções</summary>
+          <p>
+            <span data-i18n="inst_8_zine"></span>
+            <a
+              href="https://www.quarantinepubliclibrary.com/tutorial"
+              target="_blank"
+              rel="noopener"
+              >quarantinepubliclibrary.com/tutorial</a
+            >
+          </p>
+        </details>
+      </div>
+
+      <div class="choice-wrap">
+        <label class="choice" for="1_3rd">
+          <input type="radio" id="1_3rd" name="sig_format" value="1_3rd" />
+          <span class="choice-body">
+            <span class="choice-title" data-i18n="sig_1_3rd">Terços</span>
+            <span class="choice-desc" data-i18n="sig_1_3rd_small">(3 folio signature)</span>
+          </span>
+        </label>
+        <details class="note">
+          <summary data-i18n="instructions">Instruções</summary>
+          <p data-i18n="inst_1_3rd_p1"></p>
+          <p data-i18n="inst_1_3rd_p2"></p>
+        </details>
+      </div>
+
+      <div class="choice-wrap">
+        <label class="choice" for="A7_2_16s">
+          <input type="radio" id="A7_2_16s" name="sig_format" value="A7_2_16s" />
+          <span class="choice-body">
+            <span class="choice-title" data-i18n="sig_a7">Petite</span>
+            <span class="choice-desc" data-i18n="sig_a7_small">(4 folio signature x 2)</span>
+          </span>
+        </label>
+        <details class="note">
+          <summary data-i18n="instructions">Instruções</summary>
+          <img class="diagram" src="/miolo/img/2_sig_4x4_diagram.png" alt="" />
+          <p data-i18n="inst_a7"></p>
+        </details>
+      </div>
+
+      <div class="choice-wrap">
+        <label class="choice" for="a_3_6s">
+          <input type="radio" id="a_3_6s" name="sig_format" value="a_3_6s" />
+          <span class="choice-body">
+            <span class="choice-title" data-i18n="sig_a3">Pequeno</span>
+            <span class="choice-desc" data-i18n="sig_a3_small"
+              >(3 folio signature per row x 3)</span
+            >
+          </span>
+        </label>
+        <details class="note">
+          <summary data-i18n="instructions">Instruções</summary>
+          <p class="callout callout-warn" data-i18n="landscape_warn"></p>
+          <p data-i18n="test_print_warn"></p>
+          <p data-i18n="inst_a3_p1"></p>
+          <p data-i18n="fold_center_warn"></p>
+        </details>
+      </div>
+
+      <div class="choice-wrap">
+        <label class="choice" for="a9_3_3_4">
+          <input type="radio" id="a9_3_3_4" name="sig_format" value="a9_3_3_4" />
+          <span class="choice-body">
+            <span class="choice-title" data-i18n="sig_a9">Pequenino</span>
+            <span class="choice-desc" data-i18n="sig_a9_small">(3 / 3 / 4 folio signatures)</span>
+          </span>
+        </label>
+        <details class="note">
+          <summary data-i18n="instructions">Instruções</summary>
+          <img class="diagram" src="/miolo/img/3_3_4_diagram.png" alt="" />
+          <p data-i18n="inst_a9"></p>
+        </details>
+      </div>
+
+      <div class="choice-wrap">
+        <label class="choice" for="a_4_8s">
+          <input type="radio" id="a_4_8s" name="sig_format" value="a_4_8s" />
+          <span class="choice-body">
+            <span class="choice-title" data-i18n="sig_a4">Minúsculo</span>
+            <span class="choice-desc" data-i18n="sig_a4_small"
+              >(4 folio signature per row x 4)</span
+            >
+          </span>
+        </label>
+        <details class="note">
+          <summary data-i18n="instructions">Instruções</summary>
+          <p class="callout callout-warn" data-i18n="landscape_warn"></p>
+          <p data-i18n="test_print_warn"></p>
+          <p data-i18n="inst_a4_p1"></p>
+          <p data-i18n="fold_center_warn"></p>
+        </details>
+      </div>
+
+      <div class="choice-wrap">
+        <label class="choice" for="a10_6_10s">
+          <input type="radio" id="a10_6_10s" name="sig_format" value="a10_6_10s" />
+          <span class="choice-body">
+            <span class="choice-title" data-i18n="sig_a10">Mini</span>
+            <span class="choice-desc" data-i18n="sig_a10_small"
+              >(2 / 3 folio signatures per row x 6)</span
+            >
+          </span>
+        </label>
+        <details class="note">
+          <summary data-i18n="instructions">Instruções</summary>
+          <p class="callout callout-warn" data-i18n="landscape_warn"></p>
+          <p data-i18n="inst_a10_p1"></p>
+          <img class="diagram" src="/miolo/img/6_10s_diagram.png" alt="" />
+          <p data-i18n="inst_a10_p2"></p>
+          <p data-i18n="fold_center_warn"></p>
+        </details>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <label class="field">
+        <span class="field-label" data-i18n="wacky_fore_edge">Margem de corte</span>
+        <span class="field-unit">
+          <input type="number" id="fore_edge_padding_pt" name="fore_edge_padding_pt" />
+          <span>pt</span>
+        </span>
+      </label>
+      <div class="field">
+        <span class="field-label" data-i18n="wacky_spacing">Distribuição</span>
+        <div class="seg" role="radiogroup">
+          <label
+            ><input
+              type="radio"
+              id="wacky_pack"
+              name="wacky_spacing"
+              value="wacky_pack"
+              checked
+            /><span data-i18n="wacky_pack">Juntas</span></label
+          >
+          <label
+            ><input type="radio" id="wacky_gap" name="wacky_spacing" value="wacky_gap" /><span
+              data-i18n="wacky_gap"
+              >Espaçadas</span
+            ></label
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</details>
+
+
     <details class="note">
       <summary data-i18n="calc_sig_lengths_title">Como contar folhas por caderno</summary>
       <p data-i18n="calc_sig_lengths_p">
@@ -368,6 +545,7 @@
         <label class="field" for="paper_size_unit">
           <span class="field-label" data-i18n="paper_size_unit">Unidade da lista de papéis</span>
           <select name="paper_size_unit" id="paper_size_unit">
+            <option data-i18n="unit_mm" value="mm">Milímetros</option>
             <option data-i18n="unit_pt" value="pt">Pontos</option>
             <option data-i18n="unit_in" value="in">Polegadas</option>
             <option data-i18n="unit_cm" value="cm">Centímetros</option>
@@ -394,7 +572,7 @@
             />
           </div>
           <small class="hint" data-i18n="custom_tooltip">
-            The CUSTOM option will only appear if valid dimensions are provided.
+            Preencha largura e altura para a opção Personalizado aparecer na lista de papéis.
           </small>
         </div>
 
@@ -596,7 +774,7 @@
   </div>
 </details>
 
-        <details class="panel">
+        <details class="panel classic-only">
   <summary><span data-i18n="pdf_markup_title">Marcas de impressão</span></summary>
   <div class="panel-body">
     <label class="toggle">
@@ -685,177 +863,6 @@
         />
       </div>
     </details>
-    <p class="callout callout-warn" data-i18n="wacky_markup_warn">
-      Ainda não funciona com os layouts especiais.
-    </p>
-  </div>
-</details>
-
-        <details class="panel wacky">
-  <summary><span data-i18n="wacky_small_layouts">Layouts especiais</span></summary>
-  <div class="panel-body">
-    <p class="callout" data-i18n="wacky_warn">
-      These layouts contain one or more signature per printed page.
-    </p>
-
-    <div class="choices choices-compact" role="radiogroup">
-      <div class="choice-wrap">
-        <label class="choice" for="8_zine">
-          <input type="radio" id="8_zine" name="sig_format" value="8_zine" />
-          <span class="choice-body">
-            <span class="choice-title" data-i18n="sig_8_zine">Zine de folha única</span>
-            <span class="choice-desc" data-i18n="sig_8_zine_small"
-              >(one sided printed page foldup)</span
-            >
-          </span>
-        </label>
-        <details class="note">
-          <summary data-i18n="instructions">Instruções</summary>
-          <p>
-            <span data-i18n="inst_8_zine"></span>
-            <a
-              href="https://www.quarantinepubliclibrary.com/tutorial"
-              target="_blank"
-              rel="noopener"
-              >quarantinepubliclibrary.com/tutorial</a
-            >
-          </p>
-        </details>
-      </div>
-
-      <div class="choice-wrap">
-        <label class="choice" for="1_3rd">
-          <input type="radio" id="1_3rd" name="sig_format" value="1_3rd" />
-          <span class="choice-body">
-            <span class="choice-title" data-i18n="sig_1_3rd">Terços</span>
-            <span class="choice-desc" data-i18n="sig_1_3rd_small">(3 folio signature)</span>
-          </span>
-        </label>
-        <details class="note">
-          <summary data-i18n="instructions">Instruções</summary>
-          <p data-i18n="inst_1_3rd_p1"></p>
-          <p data-i18n="inst_1_3rd_p2"></p>
-        </details>
-      </div>
-
-      <div class="choice-wrap">
-        <label class="choice" for="A7_2_16s">
-          <input type="radio" id="A7_2_16s" name="sig_format" value="A7_2_16s" />
-          <span class="choice-body">
-            <span class="choice-title" data-i18n="sig_a7">Petite</span>
-            <span class="choice-desc" data-i18n="sig_a7_small">(4 folio signature x 2)</span>
-          </span>
-        </label>
-        <details class="note">
-          <summary data-i18n="instructions">Instruções</summary>
-          <img class="diagram" src="/miolo/img/2_sig_4x4_diagram.png" alt="" />
-          <p data-i18n="inst_a7"></p>
-        </details>
-      </div>
-
-      <div class="choice-wrap">
-        <label class="choice" for="a_3_6s">
-          <input type="radio" id="a_3_6s" name="sig_format" value="a_3_6s" />
-          <span class="choice-body">
-            <span class="choice-title" data-i18n="sig_a3">Pequeno</span>
-            <span class="choice-desc" data-i18n="sig_a3_small"
-              >(3 folio signature per row x 3)</span
-            >
-          </span>
-        </label>
-        <details class="note">
-          <summary data-i18n="instructions">Instruções</summary>
-          <p class="callout callout-warn" data-i18n="landscape_warn"></p>
-          <p data-i18n="test_print_warn"></p>
-          <p data-i18n="inst_a3_p1"></p>
-          <p data-i18n="fold_center_warn"></p>
-        </details>
-      </div>
-
-      <div class="choice-wrap">
-        <label class="choice" for="a9_3_3_4">
-          <input type="radio" id="a9_3_3_4" name="sig_format" value="a9_3_3_4" />
-          <span class="choice-body">
-            <span class="choice-title" data-i18n="sig_a9">Pequenino</span>
-            <span class="choice-desc" data-i18n="sig_a9_small">(3 / 3 / 4 folio signatures)</span>
-          </span>
-        </label>
-        <details class="note">
-          <summary data-i18n="instructions">Instruções</summary>
-          <img class="diagram" src="/miolo/img/3_3_4_diagram.png" alt="" />
-          <p data-i18n="inst_a9"></p>
-        </details>
-      </div>
-
-      <div class="choice-wrap">
-        <label class="choice" for="a_4_8s">
-          <input type="radio" id="a_4_8s" name="sig_format" value="a_4_8s" />
-          <span class="choice-body">
-            <span class="choice-title" data-i18n="sig_a4">Minúsculo</span>
-            <span class="choice-desc" data-i18n="sig_a4_small"
-              >(4 folio signature per row x 4)</span
-            >
-          </span>
-        </label>
-        <details class="note">
-          <summary data-i18n="instructions">Instruções</summary>
-          <p class="callout callout-warn" data-i18n="landscape_warn"></p>
-          <p data-i18n="test_print_warn"></p>
-          <p data-i18n="inst_a4_p1"></p>
-          <p data-i18n="fold_center_warn"></p>
-        </details>
-      </div>
-
-      <div class="choice-wrap">
-        <label class="choice" for="a10_6_10s">
-          <input type="radio" id="a10_6_10s" name="sig_format" value="a10_6_10s" />
-          <span class="choice-body">
-            <span class="choice-title" data-i18n="sig_a10">Mini</span>
-            <span class="choice-desc" data-i18n="sig_a10_small"
-              >(2 / 3 folio signatures per row x 6)</span
-            >
-          </span>
-        </label>
-        <details class="note">
-          <summary data-i18n="instructions">Instruções</summary>
-          <p class="callout callout-warn" data-i18n="landscape_warn"></p>
-          <p data-i18n="inst_a10_p1"></p>
-          <img class="diagram" src="/miolo/img/6_10s_diagram.png" alt="" />
-          <p data-i18n="inst_a10_p2"></p>
-          <p data-i18n="fold_center_warn"></p>
-        </details>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <label class="field">
-        <span class="field-label" data-i18n="wacky_fore_edge">Margem de corte</span>
-        <span class="field-unit">
-          <input type="number" id="fore_edge_padding_pt" name="fore_edge_padding_pt" />
-          <span>pt</span>
-        </span>
-      </label>
-      <div class="field">
-        <span class="field-label" data-i18n="wacky_spacing">Distribuição</span>
-        <div class="seg" role="radiogroup">
-          <label
-            ><input
-              type="radio"
-              id="wacky_pack"
-              name="wacky_spacing"
-              value="wacky_pack"
-              checked
-            /><span data-i18n="wacky_pack">Juntas</span></label
-          >
-          <label
-            ><input type="radio" id="wacky_gap" name="wacky_spacing" value="wacky_gap" /><span
-              data-i18n="wacky_gap"
-              >Espaçadas</span
-            ></label
-          >
-        </div>
-      </div>
-    </div>
   </div>
 </details>
 
