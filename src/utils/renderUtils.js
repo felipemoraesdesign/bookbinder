@@ -7,6 +7,7 @@ import { handleSewingMarksCheckboxState, setLabel } from './clickHandlers.js';
 import { i18n } from '../i18n.js';
 import { customSignatureError } from './customSignatures.js';
 import { fromPt, LENGTH_FIELDS, toPt } from './units.js';
+import { firstSheet, sideSvg } from './sheetDiagram.js';
 
 export function renderPageCount(book) {
   const pageCount = document.getElementById('page_count');
@@ -189,24 +190,6 @@ export function updatePageLayoutInfo(info) {
   const paperDims = info.dimensions.layoutCell;
   const pdfDims = [info.dimensions.xPdfWidthFunc(), info.dimensions.yPdfHeightFunc()];
 
-  const scale = Math.min(
-    Math.min(250 / paperDims[0], 250 / paperDims[1]),
-    Math.min(250 / pdfDims[0], 250 / pdfDims[1])
-  );
-
-  let dims = [paperDims[0] * scale, paperDims[1] * scale];
-  let displayDiv = document.getElementById('grid_layout_preview'); // blue box
-  displayDiv.style.width = `${dims[0]}px`;
-  displayDiv.style.height = `${dims[1]}px`;
-
-  dims = [pdfDims[0] * scale, pdfDims[1] * scale];
-  displayDiv = document.getElementById('pdf_on_page_layout_preview'); // orange box
-  displayDiv.style.width = `${dims[0]}px`;
-  displayDiv.style.height = `${dims[1]}px`;
-
-  dims = [info.dimensions.xBindingShiftFunc() * scale, info.dimensions.yTopShiftFunc() * scale];
-  displayDiv.style.margin = `${dims[1]}px ${dims[0]}px`;
-
   const locale = i18n.locale === 'pt' ? 'pt-BR' : 'en';
   const decimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
   const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 });
@@ -293,6 +276,22 @@ let lastLayoutInfo = null;
 /** Writes the sheet view again in the current language, once a PDF has been laid out. */
 export function refreshPageLayoutInfo() {
   if (lastLayoutInfo) updatePageLayoutInfo(lastLayoutInfo);
+  if (lastSheetBook) renderSheetDiagram(lastSheetBook);
+}
+
+let lastSheetBook = null;
+
+/** Draws the first sheet's two sides with their page numbers, turned as they print. */
+export function renderSheetDiagram(book) {
+  lastSheetBook = book;
+  const container = document.getElementById('sheet_diagram');
+  const sheet = firstSheet(book);
+  if (!sheet) return container.replaceChildren();
+  const describe = (side) => (numbers) =>
+    i18n.t('sheet_side_pages', { side: i18n.t(side), pages: numbers.join(', ') || '—' });
+  container.innerHTML =
+    sideSvg(sheet, sheet.sides[0], i18n.t('sheet_front'), describe('sheet_front')) +
+    sideSvg(sheet, sheet.sides[1], i18n.t('sheet_back'), describe('sheet_back'));
 }
 // The sizes people print on most come first; the rest keep the library's order
 const COMMON_PAPERS = ['A4', 'A5', 'A3', 'FLSA', 'SRA3', 'LETTER'];

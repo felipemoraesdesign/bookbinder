@@ -10,6 +10,7 @@ import {
   renderPageCount,
   renderWacky,
   updatePageLayoutInfo,
+  renderSheetDiagram,
 } from './renderUtils';
 import { clearUrlParams, setUrlParams, toUrlParams, updateWindowLocation } from './uri';
 import { toPt } from './units';
@@ -91,6 +92,7 @@ export const loadConfiguration = () => {
 export function updateRenderedForm(book) {
   return book.createpages().then((info) => {
     updatePageLayoutInfo(info);
+    renderSheetDiagram(book);
     console.log('... pages created');
     renderPageCount(book);
     renderInfoBox(book);

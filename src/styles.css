@@ -658,42 +658,57 @@ body[data-state='loaded'] .results {
 
 .sheet-figure {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 8px 0;
   margin: 0 auto;
+  /* the drawn sheet stays paper-light in both themes, so its ink does too */
+  --sd-ink: oklch(0.36 0.02 60);
 }
 
-.layout_spine_label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 12px;
+.sd-side {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.sd-side svg {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 1px 1px oklch(0.3 0.02 60 / 0.1))
+    drop-shadow(0 6px 14px oklch(0.3 0.02 60 / 0.12));
+}
+
+.sd-side figcaption {
+  font-size: 12.5px;
   color: var(--ink-3);
-  border-right: 2px solid var(--accent);
-  padding-right: 8px;
-  align-self: stretch;
-  text-align: center;
 }
 
-.stripes_paper {
-  background: var(--sheet);
-  box-shadow: var(--shadow-sheet);
-  border-radius: 2px;
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  overflow: hidden;
+.sd-paper {
+  fill: var(--sheet);
 }
 
-.stripes_pdf {
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--pdf-soft) 0 6px,
-    color-mix(in oklch, var(--pdf-soft) 60%, transparent) 6px 12px
-  );
-  outline: 1.5px solid var(--pdf);
-  outline-offset: -1.5px;
-  flex: none;
+.sd-pdf {
+  fill: var(--pdf-soft);
+  stroke: var(--pdf);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.sd-num {
+  font-family: var(--font-display);
+  fill: var(--sd-ink);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.sd-fold {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
 }
 
 .sheet-info {
@@ -1931,9 +1946,9 @@ select {
   }
 }
 
-/* the hatch sits on the light sheet in both themes, so it keeps its light tint in dark mode */
+/* the page areas sit on the light sheet in both themes, so they keep their light tint in dark mode */
 @media (prefers-color-scheme: dark) {
-  .stripes_pdf {
+  .sd-pdf {
     --pdf-soft: oklch(0.88 0.05 60);
   }
 }

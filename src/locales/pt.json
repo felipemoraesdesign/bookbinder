@@ -262,5 +262,8 @@
   "print_test_duplex": "Imprima só a primeira folha, frente e verso, em tamanho real (100%, com “ajustar à página” desligado). Se o verso sair de cabeça para baixo, troque a borda de virada (longa ou curta).",
   "print_rest": "Com a primeira folha certa, imprima o resto com os mesmos ajustes.",
   "print_test_single": "Imprima a primeira folha da frente em tamanho real (100%, com “ajustar à página” desligado), recoloque na bandeja e imprima o verso dela. Se der certo, faça o mesmo com o arquivo inteiro.",
-  "btn_generate_anyway": "Baixar mesmo assim"
+  "btn_generate_anyway": "Baixar mesmo assim",
+  "sheet_front": "Frente",
+  "sheet_back": "Verso",
+  "sheet_side_pages": "{side} da primeira folha: páginas {pages}"
 }

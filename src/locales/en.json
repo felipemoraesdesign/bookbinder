@@ -262,5 +262,8 @@
   "print_test_duplex": "Print only the first sheet, both sides, at actual size (100%, with “fit to page” off). If the back comes out upside down, switch the flip edge (long or short).",
   "print_rest": "Once the first sheet is right, print the rest with the same settings.",
   "print_test_single": "Print the first front sheet at actual size (100%, with “fit to page” off), put it back in the tray and print its back. If it works, do the same with the whole file.",
-  "btn_generate_anyway": "Download anyway"
+  "btn_generate_anyway": "Download anyway",
+  "sheet_front": "Front",
+  "sheet_back": "Back",
+  "sheet_side_pages": "{side} of the first sheet: pages {pages}"
 }
