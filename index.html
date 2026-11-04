@@ -21,8 +21,8 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&display=swap"
     />
-    <script type="module" crossorigin src="/miolo/assets/index-XakNE49u.js"></script>
-    <link rel="stylesheet" crossorigin href="/miolo/assets/index-BKvLfPRb.css">
+    <script type="module" crossorigin src="/miolo/assets/index-DwUfn0Et.js"></script>
+    <link rel="stylesheet" crossorigin href="/miolo/assets/index-C6r4w1Ub.css">
   </head>
 
   <body data-state="empty">
@@ -76,7 +76,7 @@
     </svg>
     <strong class="dropzone-title" data-i18n="drop_title">Solte seu PDF aqui</strong>
     <span class="dropzone-sub" data-i18n="drop_sub"
-      >Escolha o formato no painel ao lado e baixe a imposição pronta para imprimir.</span
+      >Escolha o formato nas configurações e baixe a imposição pronta para imprimir.</span
     >
     <span class="btn btn-secondary" aria-hidden="true">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -106,7 +106,7 @@
     <h2 class="section-title" id="summary_title" data-i18n="summary_title">
       Seu livro em cadernos
     </h2>
-    <p class="callout callout-warn" id="zine_page_warning" hidden></p>
+    <p class="callout callout-warn" id="summary_warning" hidden></p>
     <figure class="bookblock">
       <div class="bookblock-row" id="sig_visual" aria-hidden="true"></div>
       <figcaption>
@@ -188,6 +188,13 @@
     </div>
   </section>
 
+  <section class="print-guide" id="print_guide" aria-labelledby="print_guide_title" hidden>
+    <h2 class="section-title" id="print_guide_title" data-i18n="print_guide_title">
+      Para imprimir
+    </h2>
+    <ol class="print-steps" id="print_steps"></ol>
+  </section>
+
   <p class="preview-caption" id="preview_caption" hidden></p>
   <iframe
     id="pdf"
@@ -198,6 +205,7 @@
 </div>
 
 <div class="actionbar">
+  <p class="actionbar-summary" id="action_summary" aria-hidden="true"></p>
   <p class="actionbar-note" id="action_note" data-i18n="download_note" aria-live="polite">
     Você recebe um .zip com os arquivos prontos para imprimir.
   </p>
@@ -268,7 +276,12 @@
         <details class="panel" id="sig_format" open>
   <summary><span data-i18n="sig_format_title">Encadernação</span></summary>
   <div class="panel-body">
-    <div class="choices" role="radiogroup">
+    <div
+      class="choices"
+      role="radiogroup"
+      aria-label="Encadernação"
+      data-i18n-tooltip="sig_format_title"
+    >
       <label class="choice" for="booklet">
         <input type="radio" id="booklet" name="sig_format" value="booklet" />
         <span class="choice-body">
@@ -284,7 +297,7 @@
         <span class="choice-body">
           <span class="choice-title" data-i18n="standard_sig">Cadernos</span>
           <span class="choice-desc" data-i18n="standard_sig_desc"
-            >Vários cadernos iguais, costurados juntos.</span
+            >Vários cadernos do mesmo tamanho, costurados juntos.</span
           >
           <span class="choice-extra">
             <span class="field-unit">
@@ -306,7 +319,7 @@
         <span class="choice-body">
           <span class="choice-title" data-i18n="custom_sig">Cadernos personalizados</span>
           <span class="choice-desc" data-i18n="custom_sig_desc"
-            >Defina quantas folhas vai em cada caderno.</span
+            >Você define quantas folhas vão em cada caderno.</span
           >
           <span class="choice-extra">
             <input
@@ -316,7 +329,7 @@
               aria-describedby="custom_sig_hint"
             />
             <small class="hint" id="custom_sig_hint" data-i18n="custom_sig_tooltip"
-              >Números separados por vírgula.</small
+              >Folhas por caderno, separadas por vírgula.</small
             >
           </span>
         </span>
@@ -337,17 +350,23 @@
   <summary data-i18n="wacky_small_layouts">Folha única: zines e miniaturas</summary>
   <div class="more-body">
     <p class="callout" data-i18n="wacky_warn">
-      These layouts contain one or more signature per printed page.
+      Cada folha impressa vira um ou mais livrinhos. Valem só as opções de papel, impressão e
+      páginas.
     </p>
 
-    <div class="choices choices-compact" role="radiogroup">
+    <div
+      class="choices choices-compact"
+      role="radiogroup"
+      aria-label="Folha única: zines e miniaturas"
+      data-i18n-tooltip="wacky_small_layouts"
+    >
       <div class="choice-wrap">
         <label class="choice" for="8_zine">
           <input type="radio" id="8_zine" name="sig_format" value="8_zine" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_8_zine">Zine de folha única</span>
             <span class="choice-desc" data-i18n="sig_8_zine_small"
-              >(one sided printed page foldup)</span
+              >8 por face, impressa de um lado só, sem cortes</span
             >
           </span>
         </label>
@@ -370,7 +389,9 @@
           <input type="radio" id="1_3rd" name="sig_format" value="1_3rd" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_1_3rd">Terços</span>
-            <span class="choice-desc" data-i18n="sig_1_3rd_small">(3 folio signature)</span>
+            <span class="choice-desc" data-i18n="sig_1_3rd_small"
+              >6 por face, cadernos de 3 fólios</span
+            >
           </span>
         </label>
         <details class="note">
@@ -385,7 +406,9 @@
           <input type="radio" id="A7_2_16s" name="sig_format" value="A7_2_16s" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a7">Petite</span>
-            <span class="choice-desc" data-i18n="sig_a7_small">(4 folio signature x 2)</span>
+            <span class="choice-desc" data-i18n="sig_a7_small"
+              >16 por face, 2 cadernos de 4 fólios</span
+            >
           </span>
         </label>
         <details class="note">
@@ -401,7 +424,7 @@
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a3">Pequeno</span>
             <span class="choice-desc" data-i18n="sig_a3_small"
-              >(3 folio signature per row x 3)</span
+              >18 por face, 3 linhas de cadernos de 3 fólios</span
             >
           </span>
         </label>
@@ -419,7 +442,9 @@
           <input type="radio" id="a9_3_3_4" name="sig_format" value="a9_3_3_4" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a9">Pequenino</span>
-            <span class="choice-desc" data-i18n="sig_a9_small">(3 / 3 / 4 folio signatures)</span>
+            <span class="choice-desc" data-i18n="sig_a9_small"
+              >20 por face, cadernos de 3, 3 e 4 fólios</span
+            >
           </span>
         </label>
         <details class="note">
@@ -435,7 +460,7 @@
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a4">Minúsculo</span>
             <span class="choice-desc" data-i18n="sig_a4_small"
-              >(4 folio signature per row x 4)</span
+              >32 por face, 4 linhas de cadernos de 4 fólios</span
             >
           </span>
         </label>
@@ -454,7 +479,7 @@
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a10">Mini</span>
             <span class="choice-desc" data-i18n="sig_a10_small"
-              >(2 / 3 folio signatures per row x 6)</span
+              >60 por face, 6 linhas de cadernos de 2 e 3 fólios</span
             >
           </span>
         </label>
@@ -479,7 +504,12 @@
       </label>
       <div class="field">
         <span class="field-label" data-i18n="wacky_spacing">Distribuição</span>
-        <div class="seg" role="radiogroup">
+        <div
+          class="seg"
+          role="radiogroup"
+          aria-label="Distribuição"
+          data-i18n-tooltip="wacky_spacing"
+        >
           <label
             ><input
               type="radio"
@@ -505,8 +535,10 @@
     <details class="note">
       <summary data-i18n="calc_sig_lengths_title">Como contar folhas por caderno</summary>
       <p data-i18n="calc_sig_lengths_p">
-        In this code, the length of a signature is the number of full-sized sheets of paper per
-        signature.
+        O tamanho de um caderno é o número de folhas inteiras de papel que ele leva. No fólio, cada
+        folha tem uma dobra, então você perfura tantas dobras quantas forem as folhas. No quarto,
+        são duas dobras por folha; no oitavo, quatro; no 16º, oito. Calcule o tamanho dos cadernos
+        com isso em mente.
       </p>
     </details>
   </div>
@@ -522,7 +554,7 @@
 
     <div class="field">
       <span class="field-label" data-i18n="printer_type">Impressão</span>
-      <div class="seg" role="radiogroup">
+      <div class="seg" role="radiogroup" aria-label="Impressão" data-i18n-tooltip="printer_type">
         <label
           ><input type="radio" name="printer_type" value="duplex" /><span data-i18n="type_duplex"
             >Frente e verso</span
@@ -534,16 +566,17 @@
           ></label
         >
       </div>
-      <small class="hint" data-i18n="duplex_tooltip">
-        Duplex will alternate front and backs of sheets in a single file.
-      </small>
+      <small class="hint" data-i18n="duplex_tooltip"
+        >Frente e verso gera um arquivo só, alternando frente e verso. Uma face separa frentes e
+        versos em dois arquivos.</small
+      >
     </div>
 
     <details class="more">
       <summary data-i18n="more_paper_options">Mais opções de papel</summary>
       <div class="more-body">
         <label class="field" for="paper_size_unit">
-          <span class="field-label" data-i18n="paper_size_unit">Unidade da lista de papéis</span>
+          <span class="field-label" data-i18n="paper_size_unit">Unidade na lista de papéis</span>
           <select name="paper_size_unit" id="paper_size_unit">
             <option data-i18n="unit_mm" value="mm">Milímetros</option>
             <option data-i18n="unit_pt" value="pt">Pontos</option>
@@ -580,7 +613,7 @@
           <span>
             <span data-i18n="rotate_paper_90">Papel deitado (paisagem)</span>
             <small class="hint" data-i18n="rotate_paper_tooltip"
-              >This puts your paper in 'landscape'.</small
+              >O layout é o mesmo, mas as proporções mudam.</small
             >
           </span>
           <input type="checkbox" class="switch" name="paper_rotation_90" id="paper_rotation_90" />
@@ -590,7 +623,7 @@
           <span>
             <span data-i18n="alternate_page_rotation">Virar pela borda longa</span>
             <small class="hint" data-i18n="alternate_page_rotation_hint"
-              >Alterna a rotação das páginas no verso.</small
+              >Alterna a rotação das páginas entre frente e verso.</small
             >
           </span>
           <input type="checkbox" class="switch" name="rotate_page" />
@@ -605,7 +638,12 @@
   <div class="panel-body">
     <div class="field">
       <span class="field-label" data-i18n="layout_style">Páginas por face da folha</span>
-      <div class="seg seg-4" role="radiogroup">
+      <div
+        class="seg seg-4"
+        role="radiogroup"
+        aria-label="Páginas por face da folha"
+        data-i18n-tooltip="layout_style"
+      >
         <label
           ><input type="radio" name="pagelayout" value="folio" /><span
             ><b>2</b><small data-i18n="layout_folio">Fólio</small></span
@@ -712,7 +750,7 @@
         <span data-i18n="sheets_unit">folhas</span>
       </span>
       <small class="hint" id="flyleafs_help" data-i18n="flyleafs_tooltip"
-        >Páginas em branco no começo e no fim.</small
+        >Folhas em branco no começo e no fim do livro.</small
       >
     </label>
 
@@ -728,7 +766,8 @@
     </label>
 
     <p class="callout" data-i18n="file_warning">
-      The first page, which is odd, will be on the right when printed.
+      A página 1 do PDF sai sempre à direita. A primeira página dupla impressa é 2–3: pares à
+      esquerda, ímpares à direita.
     </p>
   </div>
 </details>
@@ -780,7 +819,9 @@
     <label class="toggle">
       <span>
         <span data-i18n="add_foldlines">Linhas de dobra</span>
-        <small class="hint" data-i18n="foldlines_tooltip">Da mais grossa para a mais fina.</small>
+        <small class="hint" data-i18n="foldlines_tooltip"
+          >Ordenadas da mais grossa para a mais fina.</small
+        >
       </span>
       <input type="checkbox" class="switch" name="cropmarks" />
     </label>
@@ -794,7 +835,9 @@
     <label class="toggle">
       <span>
         <span data-i18n="add_pdf_bounds">Limites do PDF na lombada</span>
-        <small class="hint" data-i18n="bounds_tooltip">Marca topo e base no fólio externo.</small>
+        <small class="hint" data-i18n="bounds_tooltip"
+          >Marca topo e base do PDF no fólio externo de cada caderno.</small
+        >
       </span>
       <input type="checkbox" class="switch" name="pdf_edge_marks" />
     </label>
@@ -802,13 +845,13 @@
       <span>
         <span data-i18n="add_sig_order">Ordem dos cadernos na lombada</span>
         <small class="hint" data-i18n="sig_order_tooltip"
-          >Traços escalonados indicam a sequência.</small
+          >Traços escalonados mostram a sequência dos cadernos.</small
         >
       </span>
       <input type="checkbox" class="switch" name="sig_order_marks" />
     </label>
     <label class="toggle">
-      <span data-i18n="add_sewing_marks">Furos de costura</span>
+      <span data-i18n="add_sewing_marks">Marcas de costura</span>
       <input
         type="checkbox"
         class="switch"
@@ -880,11 +923,11 @@
           <span class="version">
             <span>v1.7.0</span>
             <a
-              href="https://github.com/momijizukamori/bookbinder-js"
+              href="https://github.com/luizfelipermoraes/miolo"
               target="_blank"
               rel="noopener"
               data-i18n="intro_repo_link"
-              >GitHub</a
+              >Código no GitHub</a
             >
           </span>
         </footer>
