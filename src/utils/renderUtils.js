@@ -40,6 +40,12 @@ export function renderInfoBox(book) {
   sigCount.parentElement.hidden = !hasSignatures;
   totalPages.parentElement.hidden = isWacky;
 
+  // The single-sheet zine always takes 8 pages: say so when more would be left out
+  const zineWarning = document.getElementById('zine_page_warning');
+  const leftOut = book.format === '8_zine' ? book.pagecount - 8 : 0;
+  zineWarning.hidden = leftOut <= 0;
+  zineWarning.textContent = i18n.t('zine_page_warning', { total: book.pagecount });
+
   totalSheets.innerText = book.book.sheets;
   sigCount.innerText = book.book.sigconfig.length;
   sigArrange.innerText = book.book.sigconfig.join(', ');
@@ -125,44 +131,113 @@ export function updatePageLayoutInfo(info) {
   dims = [info.dimensions.xBindingShiftFunc() * scale, info.dimensions.yTopShiftFunc() * scale];
   displayDiv.style.margin = `${dims[1]}px ${dims[0]}px`;
 
-  document.getElementById('page_grid_layout').innerText =
-    `${info.dimensions.layout.rows} × ${info.dimensions.layout.cols}`;
-  document.getElementById('page_grid_dimensions').innerText =
-    `${paperDims[0].toFixed(1)} × ${paperDims[1].toFixed(1)}`;
-  document.getElementById('pdf_source_dimensions').innerText =
-    `${info.cropbox.width} × ${info.cropbox.height}`;
-  document.getElementById('pdf_page_dimensions').innerText =
-    `${pdfDims[0].toFixed(1)} × ${pdfDims[1].toFixed(1)}`;
-  document.getElementById('pdf_offset_dimensions').innerText = [
-    `${i18n.t('binding_margin')} ${info.dimensions.xBindingShiftFunc().toFixed(1)}`,
-    `${i18n.t('top_margin')} ${info.dimensions.yTopShiftFunc().toFixed(1)}`,
-    `${i18n.t('fore_edge_margin')} ${info.dimensions.xForeEdgeShiftFunc().toFixed(1)}`,
-    `${i18n.t('bottom_margin')} ${info.dimensions.yBottomShiftFunc().toFixed(1)}`,
+  const locale = i18n.locale === 'pt' ? 'pt-BR' : 'en';
+  const decimal = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const percent = new Intl.NumberFormat(locale, { style: 'percent', maximumFractionDigits: 0 });
+  const whole = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  const mm = (pt, format = decimal) => format.format((pt * 25.4) / 72);
+  // whole millimetres first, then the same size in pt to check against a layout app
+  const setSize = (id, [width, height]) => {
+    const inPt = document.createElement('span');
+    inPt.className = 'unit-alt';
+    inPt.textContent = ` · ${decimal.format(width)} × ${decimal.format(height)} pt`;
+    document
+      .getElementById(id)
+      .replaceChildren(`${mm(width, whole)} × ${mm(height, whole)} mm`, inPt);
+  };
+
+  const { rows, cols } = info.dimensions.layout;
+  const [scaleX, scaleY] = info.dimensions.pdfScale;
+  document.getElementById('page_grid_layout').textContent = `${rows} × ${cols}`;
+  setSize('page_grid_dimensions', paperDims);
+  setSize('pdf_source_dimensions', [info.cropbox.width, info.cropbox.height]);
+  setSize('pdf_page_dimensions', pdfDims);
+  document.getElementById('pdf_offset_dimensions').textContent = [
+    `${i18n.t('binding_margin')} ${mm(info.dimensions.xBindingShiftFunc())} mm`,
+    `${i18n.t('top_margin')} ${mm(info.dimensions.yTopShiftFunc())} mm`,
+    `${i18n.t('fore_edge_margin')} ${mm(info.dimensions.xForeEdgeShiftFunc())} mm`,
+    `${i18n.t('bottom_margin')} ${mm(info.dimensions.yBottomShiftFunc())} mm`,
   ].join('\n');
-  document.getElementById('pdf_scale_dimensions').innerText =
-    `${info.dimensions.pdfScale[0].toFixed(2)}, ${info.dimensions.pdfScale[1].toFixed(2)}`;
-  document.getElementById('pdf_page_rotation_info').innerText = i18n.t(
+  const stretched = Math.abs(scaleX - scaleY) > 0.01;
+  document.getElementById('pdf_scale_dimensions').textContent = stretched
+    ? `${percent.format(scaleX)} × ${percent.format(scaleY)}`
+    : percent.format(scaleX);
+  document.getElementById('pdf_page_rotation_info').textContent = i18n.t(
     needsRotation ? 'yes' : 'no'
   );
+
+  // The numbers that matter, said as a binder would: how many pages share a side, and what
+  // happens to their size, so a 350% enlargement is read before printing rather than after.
+  const pages = rows * cols;
+  const paper = paperName(document.getElementById('paper_size').value);
+  let scaleKey = 'sheet_scale_same';
+  if (stretched) scaleKey = 'sheet_scale_stretch';
+  else if (scaleX > 1.02) scaleKey = 'sheet_scale_up';
+  else if (scaleX < 0.98) scaleKey = 'sheet_scale_down';
+  document.getElementById('sheet_summary').textContent = [
+    i18n.t(pages === 1 ? 'sheet_lead_one' : 'sheet_lead', { n: pages, paper }),
+    i18n.t(scaleKey, {
+      pct: percent.format(scaleX),
+      x: percent.format(scaleX),
+      y: percent.format(scaleY),
+    }),
+    needsRotation ? i18n.t('sheet_rotated') : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const warning = document.getElementById('sheet_scale_warning');
+  warning.hidden = Math.abs(scaleX - 1) < 0.1 && Math.abs(scaleY - 1) < 0.1;
+  warning.textContent = i18n.t('sheet_scale_warning', {
+    size: decimal.format(10 * Math.min(scaleX, scaleY)),
+  });
+  lastLayoutInfo = info;
 }
+
+let lastLayoutInfo = null;
+
+/** Writes the sheet view again in the current language, once a PDF has been laid out. */
+export function refreshPageLayoutInfo() {
+  if (lastLayoutInfo) updatePageLayoutInfo(lastLayoutInfo);
+}
+// The sizes people print on most come first; the rest keep the library's order
+const COMMON_PAPERS = ['A4', 'A5', 'A3', 'FLSA', 'SRA3', 'LETTER'];
+
+// [size of one pt in the unit, decimals shown]
+// the library's sizes are rounded pt, so whole millimetres read true (A4 · 210 × 297, not 209,9)
+const UNITS = { mm: [25.4 / 72, 0], cm: [2.54 / 72, 1], in: [1 / 72, 2], pt: [1, 2] };
+
 /**
- * Expects a data object describing the overall page layout info:
- *
+ * A paper's readable name: its translation when it has one ("Carta", "Ofício"), otherwise the
+ * constant made readable ("JIS_B5" → "JIS B5", "CROWN_QUARTO" → "Crown quarto").
+ * @param {string} key - a PAGE_SIZES key
  */
+export function paperName(key) {
+  const translated = i18n.t(`paper_${key}`);
+  if (translated !== `paper_${key}`) return translated;
+  const words = key.replace(/^_/, '').split('_');
+  // short words and words with digits are codes (A4, JIS, ARCH, B10); longer ones are names
+  return words
+    .map((word, i) => {
+      if (word.length <= 4 || /\d/.test(word)) return word;
+      return i === 0 ? word[0] + word.slice(1).toLowerCase() : word.toLowerCase();
+    })
+    .join(' ');
+}
+
+/** Labels each paper "A4 · 210 × 297 mm" in the chosen unit and the interface's number format. */
 export function updatePaperSelectOptionsUnits() {
   const paperList = document.getElementById('paper_size');
-  const paperListUnit = document.getElementById('paper_size_unit').value;
-  for (const option of Array.from(paperList.children)) {
-    const paperName = option.value;
-    const paper = PAGE_SIZES[paperName];
-    let label = `${paperName} (${paper[0]} x ${paper[1]} pt)`;
-    // conversion values from Google default converter
-    if (paperListUnit == 'in') {
-      label = `${paperName} (${(paper[0] * 0.0138889).toFixed(1)} x ${(paper[1] * 0.0138889).toFixed(1)} inches)`;
-    } else if (paperListUnit == 'cm') {
-      label = `${paperName} (${(paper[0] * 0.0352778).toFixed(2)} x ${(paper[1] * 0.0352778).toFixed(2)} cm)`;
-    }
-    option.setAttribute('label', label);
+  const unit = document.getElementById('paper_size_unit').value;
+  const [perPt, decimals] = UNITS[unit] ?? UNITS.mm;
+  const number = new Intl.NumberFormat(i18n.locale === 'pt' ? 'pt-BR' : 'en', {
+    maximumFractionDigits: decimals,
+  });
+  for (const option of paperList.options) {
+    const [width, height] = PAGE_SIZES[option.value];
+    option.label = `${paperName(option.value)} · ${number.format(width * perPt)} × ${number.format(height * perPt)} ${unit}`;
+  }
+  for (const group of paperList.querySelectorAll('optgroup')) {
+    group.label = i18n.t(group.dataset.label);
   }
 }
 export function updateAddOrRemoveCustomPaperOption() {
@@ -190,40 +265,29 @@ export function updateAddOrRemoveCustomPaperOption() {
 }
 export function renderPaperSelectOptions() {
   const paperList = document.getElementById('paper_size');
-  //   const maxLength = Math.max(
-  //     Object.keys(PAGE_SIZES).map((s) => {
-  //       s.length;
-  //     })
-  //   );
-  Object.keys(PAGE_SIZES).forEach((key) => {
-    const opt = document.createElement('option');
-    opt.setAttribute('value', key);
-    opt.setAttribute('name', key);
-    if (key == 'A4') {
-      opt.setAttribute('selected', true);
-    }
-    opt.innerText = key;
-    paperList.appendChild(opt);
-  });
+  const addGroup = (labelKey, keys) => {
+    const group = document.createElement('optgroup');
+    group.dataset.label = labelKey;
+    group.append(...keys.map((key) => new Option(key, key, key === 'A4', key === 'A4')));
+    paperList.append(group);
+  };
+  addGroup('paper_common', COMMON_PAPERS);
+  addGroup(
+    'paper_other',
+    Object.keys(PAGE_SIZES).filter((key) => !COMMON_PAPERS.includes(key))
+  );
   updatePaperSelectOptionsUnits();
 }
 
+/**
+ * The single-sheet layouts pad their pages as folios: while one is chosen, the book-size choice
+ * leaves the form (its panel is hidden by CSS) and comes back unchanged when a classic format is.
+ */
 export function renderWacky() {
-  const isWacky =
-    document.getElementById('a9_3_3_4').checked ||
-    document.getElementById('a10_6_10s').checked ||
-    document.getElementById('a_3_6s').checked ||
-    document.getElementById('a_4_8s').checked ||
-    document.getElementById('A7_2_16s').checked ||
-    document.getElementById('1_3rd').checked;
-  console.log('Is a wacky layout? ', isWacky);
-  document
-    .getElementById('book_size')
-    .querySelectorAll('input')
-    .forEach((x) => {
-      x.disabled = isWacky;
-    });
-  document.getElementById('book_size').style.opacity = isWacky ? 0.3 : 1.0;
+  const isWacky = Boolean(document.querySelector('.wacky input[name="sig_format"]:checked'));
+  document.querySelectorAll('#book_size input').forEach((input) => {
+    input.disabled = isWacky;
+  });
 }
 
 /** @param { import("../models/configuration").Configuration } configuration */
@@ -329,6 +393,11 @@ export function renderFormFromSettings(configuration) {
     document.querySelector("input[name='sig_length']").value = configuration.sigLength;
   }
 
+  // A saved single-sheet layout opens its group, so the chosen format is in view
+  if (document.querySelector('.wacky input[name="sig_format"]:checked')) {
+    document.getElementById('single_sheet').open = true;
+  }
+
   // Hide and show elements based on configuration
   const sourceRotationExamples = Array.from(
     document.getElementsByClassName('source_rotation_example')
@@ -342,6 +411,7 @@ export function renderFormFromSettings(configuration) {
 export function clearPreview() {
   const previewFrame = document.getElementById('pdf');
   previewFrame.style.display = 'none';
+  document.getElementById('preview_caption').hidden = true;
   if (previewFrame.src.startsWith('blob:')) {
     URL.revokeObjectURL(previewFrame.src);
   }

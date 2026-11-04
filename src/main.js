@@ -13,7 +13,14 @@ import {
   renderDownloadNote,
   setLabel,
 } from './utils/clickHandlers.js';
-import { renderFormFromSettings, renderPaperSelectOptions } from './utils/renderUtils.js';
+import {
+  paperName,
+  renderInfoBox,
+  refreshPageLayoutInfo,
+  renderFormFromSettings,
+  renderPaperSelectOptions,
+  updatePaperSelectOptionsUnits,
+} from './utils/renderUtils.js';
 import { setupPresets } from './utils/presets.js';
 import { pageRangeError } from './utils/pageRange.js';
 import { i18n } from './i18n.js';
@@ -90,7 +97,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       format?.closest('.choice')?.querySelector('.choice-title')?.textContent,
       format?.value === 'standardsig' &&
         `${bookbinderForm.elements.sig_length.value} ${i18n.t('sheets_each')}`,
-      bookbinderForm.elements.paper_size.value,
+      paperName(bookbinderForm.elements.paper_size.value),
       checked('printer_type')?.nextElementSibling?.textContent.toLocaleLowerCase(i18n.locale),
     ]
       .filter(Boolean)
@@ -126,7 +133,12 @@ window.addEventListener('DOMContentLoaded', async () => {
     setMessage(pageRangeHelp, error ? `page_range_${error}` : 'page_range_help');
   };
 
-  onLanguageChange = renderSetupSummary;
+  onLanguageChange = () => {
+    updatePaperSelectOptionsUnits();
+    refreshPageLayoutInfo();
+    if (book.book) renderInfoBox(book);
+    renderSetupSummary();
+  };
   renderSetupSummary();
 
   // add event listeners to grabbed elements

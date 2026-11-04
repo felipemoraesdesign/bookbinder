@@ -51,6 +51,7 @@
     <h2 class="section-title" id="summary_title" data-i18n="summary_title">
       Seu livro em cadernos
     </h2>
+    <p class="callout callout-warn" id="zine_page_warning" hidden></p>
     <figure class="bookblock">
       <div class="bookblock-row" id="sig_visual" aria-hidden="true"></div>
       <figcaption>
@@ -89,43 +90,50 @@
           <div class="stripes_pdf" id="pdf_on_page_layout_preview"></div>
         </div>
       </div>
-      <dl class="sheet-legend" id="layout_margin_info">
-        <div>
-          <dt><i class="swatch swatch-paper"></i><span data-i18n="layout">Grade da folha</span></dt>
-          <dd id="page_grid_layout"></dd>
-        </div>
-        <div>
-          <dt>
-            <i class="swatch swatch-paper"></i
-            ><span data-i18n="max_page_size">Espaço por página</span>
-          </dt>
-          <dd id="page_grid_dimensions"></dd>
-        </div>
-        <div>
-          <dt><i class="swatch swatch-pdf"></i><span data-i18n="source">PDF original</span></dt>
-          <dd id="pdf_source_dimensions"></dd>
-        </div>
-        <div>
-          <dt><i class="swatch swatch-pdf"></i><span data-i18n="on_page">Na folha</span></dt>
-          <dd id="pdf_page_dimensions"></dd>
-        </div>
-        <div>
-          <dt data-i18n="scaling">Escala</dt>
-          <dd id="pdf_scale_dimensions"></dd>
-        </div>
-        <div>
-          <dt data-i18n="rotated">Rotacionada</dt>
-          <dd id="pdf_page_rotation_info"></dd>
-        </div>
-        <div class="span-2">
-          <dt data-i18n="offset">Deslocamento</dt>
-          <dd id="pdf_offset_dimensions"></dd>
-        </div>
-        <p class="span-2 muted" data-i18n="all_dims_pts">Medidas em pontos (1 pt = 1/72 pol.)</p>
-      </dl>
+      <div class="sheet-info">
+        <p class="sheet-summary" id="sheet_summary"></p>
+        <p class="callout callout-warn" id="sheet_scale_warning" hidden></p>
+        <details class="sheet-details">
+          <summary data-i18n="sheet_details">Medidas</summary>
+          <dl class="sheet-legend" id="layout_margin_info">
+            <div>
+              <dt data-i18n="layout">Grade da folha</dt>
+              <dd id="page_grid_layout"></dd>
+            </div>
+            <div>
+              <dt>
+                <i class="swatch swatch-paper"></i
+                ><span data-i18n="max_page_size">Espaço por página</span>
+              </dt>
+              <dd id="page_grid_dimensions"></dd>
+            </div>
+            <div>
+              <dt><i class="swatch swatch-pdf"></i><span data-i18n="source">PDF original</span></dt>
+              <dd id="pdf_source_dimensions"></dd>
+            </div>
+            <div>
+              <dt><i class="swatch swatch-pdf"></i><span data-i18n="on_page">Na folha</span></dt>
+              <dd id="pdf_page_dimensions"></dd>
+            </div>
+            <div>
+              <dt data-i18n="scaling">Escala</dt>
+              <dd id="pdf_scale_dimensions"></dd>
+            </div>
+            <div>
+              <dt data-i18n="rotated">Rotacionada</dt>
+              <dd id="pdf_page_rotation_info"></dd>
+            </div>
+            <div class="span-2">
+              <dt data-i18n="offset">Deslocamento</dt>
+              <dd id="pdf_offset_dimensions"></dd>
+            </div>
+          </dl>
+        </details>
+      </div>
     </div>
   </section>
 
+  <p class="preview-caption" id="preview_caption" hidden></p>
   <iframe
     id="pdf"
     title="Pré-visualização"

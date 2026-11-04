@@ -44,7 +44,7 @@ const availablePaperSizes = Object.keys(PAGE_SIZES);
 
 const paperSize = urlSafe(z.enum([...availablePaperSizes, 'CUSTOM'])).default('A4');
 
-const paperSizeUnit = urlSafe(z.enum(['pt', 'in', 'cm'])).default('pt');
+const paperSizeUnit = urlSafe(z.enum(['mm', 'pt', 'in', 'cm'])).default('mm');
 
 const printerType = urlSafe(z.enum(['single', 'duplex'])).default('duplex');
 

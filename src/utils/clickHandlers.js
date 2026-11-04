@@ -13,12 +13,15 @@ import {
 
 // Buttons hold an icon plus a [data-i18n] label; swap only the label so the icon stays.
 function setBusy(buttonEl, labelKey) {
+  // keep the button's width while its label changes, so the buttons beside it don't shift
+  buttonEl.style.minWidth = `${buttonEl.offsetWidth}px`;
   buttonEl.setAttribute('disabled', true);
   buttonEl.classList.add('is-busy');
   setLabel(buttonEl, labelKey);
 }
 
 function setIdle(buttonEl, labelKey) {
+  buttonEl.style.minWidth = '';
   buttonEl.removeAttribute('disabled');
   buttonEl.classList.remove('is-busy', 'is-done');
   setLabel(buttonEl, labelKey);
@@ -70,9 +73,13 @@ export function handleGenerateClick(generateEl, book) {
   console.log('The whole Book model:', book);
   const result = book.createoutputfiles(false);
   result
-    .then(() => {
+    .then((fileName) => {
       console.log('Generated result!');
       setDone(generateEl, 'btn_done', 'btn_generate');
+      // Names the file under the actions (read out by screen readers) until a setting changes
+      const note = document.getElementById('action_note');
+      note.removeAttribute('data-i18n');
+      note.textContent = i18n.t('download_done', { name: fileName });
     })
     .catch((error) => {
       console.error(error);

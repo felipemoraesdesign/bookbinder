@@ -496,20 +496,36 @@ export class Book {
   async displayPreview(previewPdf) {
     console.log('Attempting to generate preview for ', previewPdf);
     const previewFrame = document.getElementById('pdf');
-    // A blob URL rather than a data URI: Chrome won't load a data URI over ~2 MB in a frame
-    const pdfBytes = await previewPdf.save();
+    // Set before saving, or the viewer shows the blob's id as the title
+    previewPdf.setTitle(i18n.t('preview_doc_title', { name: this.filename }));
     const viewerPrefs = previewPdf.catalog.getOrCreateViewerPreferences();
-
     viewerPrefs.setHideToolbar(false);
     viewerPrefs.setHideMenubar(false);
     viewerPrefs.setHideWindowUI(false);
     viewerPrefs.setFitWindow(true);
     viewerPrefs.setCenterWindow(true);
     viewerPrefs.setDisplayDocTitle(true);
+    // A blob URL rather than a data URI: Chrome won't load a data URI over ~2 MB in a frame
+    const pdfBytes = await previewPdf.save();
 
     previewFrame.src = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
     previewFrame.style.display = '';
-    previewFrame.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const caption = document.getElementById('preview_caption');
+    caption.textContent = this.previewCaption();
+    caption.hidden = false;
+    caption.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  /** Says which part of the book the preview shows: only the first signature is imposed for it. */
+  previewCaption() {
+    const signatures = this.book.sigconfig.length;
+    if (this.format === 'perfect' && signatures > 1) {
+      return i18n.t('preview_first_sheet', { total: signatures });
+    }
+    if ((this.format === 'standardsig' || this.format === 'customsig') && signatures > 1) {
+      return i18n.t('preview_first_signature', { total: signatures });
+    }
+    return i18n.t('preview_whole');
   }
 
   /**
@@ -730,7 +746,10 @@ export class Book {
     this.zip.file(`${i18n.t('out_settings_file')}.txt`, settings);
   }
 
-  /** Saves a lone PDF as is, so it opens straight away; several files go in a .zip with the settings. */
+  /**
+   * Saves a lone PDF as is, so it opens straight away; several files go in a .zip with the settings.
+   * @returns {Promise<string>} the downloaded file's name
+   */
   async saveDownload() {
     const pdfs = this.zip.file(/\.pdf$/);
     const single = makesSinglePdf({
@@ -741,11 +760,13 @@ export class Book {
     if (pdfs.length === 1 && single) {
       const bytes = await pdfs[0].async('uint8array');
       saveAs(new Blob([bytes], { type: 'application/pdf' }), pdfs[0].name);
-      return;
+      return pdfs[0].name;
     }
     this.bundleSettings();
     const blob = await this.zip.generateAsync({ type: 'blob' });
-    saveAs(blob, `${i18n.t('out_zip', { name: this.filename })}.zip`);
+    const name = `${i18n.t('out_zip', { name: this.filename })}.zip`;
+    saveAs(blob, name);
+    return name;
   }
 
   /**

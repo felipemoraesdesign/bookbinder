@@ -3,7 +3,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import { describe, expect, it } from 'vitest';
-import { renderSignatureBlock } from './renderUtils';
+import { paperName, renderSignatureBlock } from './renderUtils';
+import { i18n } from '../i18n';
 
 describe('renderSignatureBlock', () => {
   it('draws one caderno per signature with a fore-edge line between its sheets', () => {
@@ -23,5 +24,21 @@ describe('renderSignatureBlock', () => {
       expect(height).toBeLessThan(92);
       expect(container.innerHTML).not.toContain('NaN');
     }
+  });
+});
+
+describe('paperName', () => {
+  it('reads paper constants as names', () => {
+    expect(paperName('JIS_B5')).toBe('JIS B5');
+    expect(paperName('ARCH_E')).toBe('ARCH E');
+    expect(paperName('CROWN_QUARTO')).toBe('Crown quarto');
+    expect(paperName('PENGUIN_LARGE_PAPERBACK')).toBe('Penguin large paperback');
+  });
+
+  it('uses the translation when there is one', async () => {
+    await i18n.init();
+    expect(paperName('LETTER')).toBe('Carta');
+    expect(paperName('FLSA')).toBe('Ofício');
+    expect(paperName('A4')).toBe('A4');
   });
 });

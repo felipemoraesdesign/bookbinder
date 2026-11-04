@@ -17,9 +17,11 @@
   --surface-2: oklch(0.948 0.011 82);
   --line: oklch(0.885 0.013 80);
   --line-strong: oklch(0.79 0.016 78);
+  /* edges that identify a control (fields, cards, radios, switches): 3:1 on the surfaces */
+  --control-line: oklch(0.64 0.016 78);
   --ink: oklch(0.23 0.014 60);
   --ink-2: oklch(0.44 0.014 62);
-  --ink-3: oklch(0.56 0.012 64);
+  --ink-3: oklch(0.52 0.012 64);
   --accent: oklch(0.47 0.15 24);
   --accent-hover: oklch(0.41 0.14 24);
   --accent-ink: oklch(0.985 0.008 30);
@@ -56,9 +58,10 @@
     --surface-2: oklch(0.275 0.012 60);
     --line: oklch(0.33 0.012 60);
     --line-strong: oklch(0.42 0.014 60);
+    --control-line: oklch(0.56 0.014 60);
     --ink: oklch(0.94 0.008 80);
     --ink-2: oklch(0.78 0.01 75);
-    --ink-3: oklch(0.64 0.01 70);
+    --ink-3: oklch(0.68 0.01 70);
     --accent: oklch(0.7 0.13 28);
     --accent-hover: oklch(0.76 0.12 28);
     --accent-ink: oklch(0.18 0.02 30);
@@ -522,6 +525,10 @@ body[data-state='loaded'] .results {
   min-width: 0;
 }
 
+.summary > .callout {
+  margin: 0 0 16px;
+}
+
 .bookblock {
   display: flex;
   flex-direction: column;
@@ -664,13 +671,47 @@ body[data-state='loaded'] .results {
   flex: none;
 }
 
-.sheet-legend {
+.sheet-info {
   flex: 1;
   min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sheet-summary {
   margin: 0;
+  max-width: 34ch;
+  font: 400 21px/1.35 var(--font-display);
+  text-wrap: pretty;
+}
+
+.sheet-details > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  cursor: pointer;
+  list-style: none;
+  border-radius: 2px;
+  transition: color var(--dur-micro) var(--ease);
+}
+
+.sheet-details > summary:hover {
+  color: var(--ink);
+}
+
+.sheet-legend {
+  margin: 16px 0 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px 24px;
+}
+
+.unit-alt {
+  color: var(--ink-3);
 }
 
 .sheet-legend dt {
@@ -711,6 +752,13 @@ body[data-state='loaded'] .results {
 .muted {
   color: var(--ink-3);
   font-size: 12px;
+}
+
+.preview-caption {
+  scroll-margin-top: 72px;
+  margin: 0 0 -8px;
+  font-size: 13px;
+  color: var(--ink-2);
 }
 
 #pdf {
@@ -1066,6 +1114,7 @@ details > summary::-webkit-details-marker {
 
 .panel > summary::after,
 .more > summary::after,
+.sheet-details > summary::after,
 .nested > summary::after {
   content: '';
   width: 7px;
@@ -1079,6 +1128,7 @@ details > summary::-webkit-details-marker {
 
 .panel[open] > summary::after,
 .more[open] > summary::after,
+.sheet-details[open] > summary::after,
 .nested[open] > summary::after {
   transform: rotate(225deg) translateY(-2px);
 }
@@ -1122,10 +1172,15 @@ details[open] > .more-body {
   display: none;
 }
 
-/* Classic layout settings don't apply to the special layouts */
-.inspector:has(.wacky input[name='sig_format']:checked) .classic-only {
-  opacity: 0.4;
-  pointer-events: none;
+/* Folding, margins, marks and the sheet view don't apply to the single-sheet layouts: they leave,
+   rather than staying dimmed and still reachable from the keyboard */
+.app:has(.wacky input[name='sig_format']:checked) :is(.classic-only, .sheet-view) {
+  display: none;
+}
+
+/* the chosen single-sheet layout stays findable when its group is closed */
+.wacky:has(input[name='sig_format']:checked) > summary {
+  color: var(--accent);
 }
 
 /* ---------- Fields ---------- */
@@ -1160,7 +1215,7 @@ select {
   width: 100%;
   height: var(--control-h);
   padding: 0 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-line);
   border-radius: var(--r-sm);
   background: var(--surface);
   color: var(--ink);
@@ -1177,7 +1232,7 @@ input::placeholder {
 input[type='text']:hover,
 input[type='number']:hover,
 select:hover {
-  border-color: var(--line-strong);
+  border-color: var(--ink-3);
 }
 
 input[type='text']:focus,
@@ -1376,7 +1431,7 @@ select {
   width: 16px;
   height: 16px;
   margin: 2px 0 0;
-  border: 1.5px solid var(--line-strong);
+  border: 1.5px solid var(--control-line);
   border-radius: 50%;
   background: var(--surface);
   transition: border var(--dur-micro) var(--ease-out);
@@ -1450,7 +1505,7 @@ select {
   height: 20px;
   margin: 0;
   border-radius: 999px;
-  background: var(--line-strong);
+  background: var(--control-line);
   cursor: pointer;
   transition: background var(--dur-short) var(--ease);
 }

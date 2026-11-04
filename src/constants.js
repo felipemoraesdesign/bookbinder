@@ -19,6 +19,7 @@ export const PAGE_SIZES = {
   A7: [210, 297],
   A8: [148, 210],
   A9: [105, 148],
+  SRA3: [907.09, 1275.59], // 320 × 450 mm, the oversize sheet digital print shops use
   B0: [2834, 4008],
   B1: [2004, 2834],
   B2: [1417, 2004],
