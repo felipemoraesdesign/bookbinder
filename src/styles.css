@@ -538,11 +538,14 @@ body[data-state='loaded'] .results {
   text-decoration-color: currentColor;
 }
 
-/* downloading now would leave pages out */
-.btn-primary.has-warning {
-  box-shadow:
-    0 0 0 2px var(--bg),
-    0 0 0 4px var(--warn-ink);
+/* the way to a whole book, ahead of downloading one that leaves pages out */
+.btn.callout-fix {
+  display: flex;
+  width: fit-content;
+  height: 36px;
+  margin-top: 10px;
+  padding: 0 16px;
+  font-size: 13.5px;
 }
 
 .bookblock {
@@ -627,6 +630,12 @@ body[data-state='loaded'] .results {
   font: 400 32px/1 var(--font-display);
   letter-spacing: -0.02em;
   font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* "20 de 32" stays on one line in the narrow column */
+.stats dd.is-short {
+  font-size: 24px;
+  white-space: nowrap;
 }
 
 .is-updated {

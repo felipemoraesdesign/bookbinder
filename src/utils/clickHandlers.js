@@ -77,7 +77,7 @@ export function handleGenerateClick(generateEl, book) {
   result
     .then((fileName) => {
       console.log('Generated result!');
-      setDone(generateEl, 'btn_done', 'btn_generate');
+      setDone(generateEl, 'btn_done', generateEl.dataset.idle || 'btn_generate');
       // Names the file under the actions (read out by screen readers) until a setting changes
       const note = document.getElementById('action_note');
       note.removeAttribute('data-i18n');
@@ -86,7 +86,7 @@ export function handleGenerateClick(generateEl, book) {
     })
     .catch((error) => {
       console.error(error);
-      setIdle(generateEl, 'btn_generate');
+      setIdle(generateEl, generateEl.dataset.idle || 'btn_generate');
       showActionError('generate_error');
     });
 }

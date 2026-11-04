@@ -3,7 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import { PAGE_SIZES } from '../constants';
-import { handleSewingMarksCheckboxState } from './clickHandlers.js';
+import { handleSewingMarksCheckboxState, setLabel } from './clickHandlers.js';
 import { i18n } from '../i18n.js';
 import { customSignatureError } from './customSignatures.js';
 import { fromPt, LENGTH_FIELDS, toPt } from './units.js';
@@ -63,7 +63,7 @@ export function renderInfoBox(book) {
     const missing = customCheck.needed - customCheck.sum;
     const fix = document.createElement('button');
     fix.type = 'button';
-    fix.className = 'link-btn callout-action';
+    fix.className = 'btn btn-primary callout-fix';
     fix.textContent = i18n.t('custom_sig_add', { n: missing });
     fix.addEventListener('click', () => {
       const field = document.querySelector('input[name="custom_sig"]');
@@ -72,24 +72,32 @@ export function renderInfoBox(book) {
     });
     summaryWarning.append(' ', fix);
   }
-  // the download says it leaves pages out, for eyes and for screen readers
+  // a book that would leave pages out isn't the main action: the fix above is, and the download
+  // steps back and says what it does
   const generate = document.getElementById('generate');
-  generate.classList.toggle('has-warning', short);
+  generate.classList.toggle('btn-primary', !short);
+  generate.classList.toggle('btn-ghost', short);
+  generate.dataset.idle = short ? 'btn_generate_anyway' : 'btn_generate';
+  if (!generate.classList.contains('is-busy') && !generate.classList.contains('is-done')) {
+    setLabel(generate, generate.dataset.idle);
+  }
   if (short) generate.setAttribute('aria-describedby', 'summary_warning');
   else generate.removeAttribute('aria-describedby');
 
   // the figures that matter most, kept in the action bar pinned to the bottom of a phone screen
+  const sheets = short
+    ? i18n.t('sheets_of', { sum: customCheck.sum, needed: customCheck.needed })
+    : book.book.sheets;
   document.getElementById('action_summary').textContent = [
-    `${i18n.t('total_sheets')} ${book.book.sheets}`,
+    `${i18n.t('total_sheets')} ${sheets}`,
     hasSignatures && `${i18n.t('num_signatures')} ${book.book.sigconfig.length}`,
   ]
     .filter(Boolean)
     .join(' · ');
 
   // custom signatures that fall short print fewer sheets than the pages fill: say how many go out
-  totalSheets.innerText = short
-    ? i18n.t('sheets_of', { sum: customCheck.sum, needed: customCheck.needed })
-    : book.book.sheets;
+  totalSheets.innerText = sheets;
+  totalSheets.classList.toggle('is-short', short);
   sigCount.innerText = book.book.sigconfig.length;
   sigArrange.innerText = book.book.sigconfig.join(', ');
   totalPages.innerText = outputPages;
