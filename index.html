@@ -19,10 +19,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;0,7..72,600;1,7..72,400&display=swap"
     />
-    <script type="module" crossorigin src="/miolo/assets/index-DwUfn0Et.js"></script>
-    <link rel="stylesheet" crossorigin href="/miolo/assets/index-C6r4w1Ub.css">
+    <script type="module" crossorigin src="/miolo/assets/index-CrPR9ez6.js"></script>
+    <link rel="stylesheet" crossorigin href="/miolo/assets/index-CRSdcoFo.css">
   </head>
 
   <body data-state="empty">
@@ -195,7 +195,12 @@
     <ol class="print-steps" id="print_steps"></ol>
   </section>
 
-  <p class="preview-caption" id="preview_caption" hidden></p>
+  <div class="preview-head" id="preview_head" hidden>
+    <p class="preview-caption" id="preview_caption"></p>
+    <button type="button" class="link-btn" id="preview_close" data-i18n="preview_close">
+      Fechar prévia
+    </button>
+  </div>
   <iframe
     id="pdf"
     title="Pré-visualização"
@@ -205,7 +210,10 @@
 </div>
 
 <div class="actionbar">
-  <p class="actionbar-summary" id="action_summary" aria-hidden="true"></p>
+  <div class="actionbar-meta">
+    <p class="actionbar-summary" id="action_summary" aria-hidden="true"></p>
+    <button type="button" class="link-btn" id="go_settings" data-i18n="go_settings">Ajustes</button>
+  </div>
   <p class="actionbar-note" id="action_note" data-i18n="download_note" aria-live="polite">
     Você recebe um .zip com os arquivos prontos para imprimir.
   </p>
@@ -498,8 +506,8 @@
       <label class="field">
         <span class="field-label" data-i18n="wacky_fore_edge">Margem de corte</span>
         <span class="field-unit">
-          <input type="number" id="fore_edge_padding_pt" name="fore_edge_padding_pt" />
-          <span>pt</span>
+          <input type="number" id="fore_edge_padding_pt" name="fore_edge_padding_pt" step="any" />
+          <span class="unit-label">mm</span>
         </span>
       </label>
       <div class="field">
@@ -576,7 +584,7 @@
       <summary data-i18n="more_paper_options">Mais opções de papel</summary>
       <div class="more-body">
         <label class="field" for="paper_size_unit">
-          <span class="field-label" data-i18n="paper_size_unit">Unidade na lista de papéis</span>
+          <span class="field-label" data-i18n="paper_size_unit">Unidade de medida</span>
           <select name="paper_size_unit" id="paper_size_unit">
             <option data-i18n="unit_mm" value="mm">Milímetros</option>
             <option data-i18n="unit_pt" value="pt">Pontos</option>
@@ -586,12 +594,18 @@
         </label>
 
         <div class="field">
-          <span class="field-label" data-i18n="dimensions_custom">Tamanho personalizado (pt)</span>
+          <span class="field-label"
+            ><span data-i18n="dimensions_custom">Tamanho personalizado</span> (<span
+              class="unit-label"
+              >mm</span
+            >)</span
+          >
           <div class="pair">
             <input
               type="number"
               id="paper_size_custom_width"
               name="paper_size_custom_width"
+              step="any"
               data-i18n-placeholder="width"
               placeholder="Largura"
             />
@@ -600,6 +614,7 @@
               type="number"
               id="paper_size_custom_height"
               name="paper_size_custom_height"
+              step="any"
               data-i18n-placeholder="height"
               placeholder="Altura"
             />
@@ -697,23 +712,41 @@
       </div>
 
       <div class="field">
-        <span class="field-label" data-i18n="margins_title">Margens extras (pt)</span>
+        <span class="field-label"
+          ><span data-i18n="margins_title">Margens extras</span> (<span class="unit-label">mm</span
+          >)</span
+        >
         <div class="margin-box">
           <label class="m-top">
-            <input type="number" id="top_edge_padding_pt" name="top_edge_padding_pt" />
+            <input type="number" id="top_edge_padding_pt" name="top_edge_padding_pt" step="any" />
             <span data-i18n="top_margin">Superior</span>
           </label>
           <label class="m-binding">
-            <input type="number" id="binding_edge_padding_pt" name="binding_edge_padding_pt" />
+            <input
+              type="number"
+              id="binding_edge_padding_pt"
+              name="binding_edge_padding_pt"
+              step="any"
+            />
             <span data-i18n="binding_margin">Lombada</span>
           </label>
           <span class="m-page" aria-hidden="true"></span>
           <label class="m-fore">
-            <input type="number" id="main_fore_edge_padding_pt" name="main_fore_edge_padding_pt" />
+            <input
+              type="number"
+              id="main_fore_edge_padding_pt"
+              name="main_fore_edge_padding_pt"
+              step="any"
+            />
             <span data-i18n="fore_edge_margin">Corte</span>
           </label>
           <label class="m-bottom">
-            <input type="number" id="bottom_edge_padding_pt" name="bottom_edge_padding_pt" />
+            <input
+              type="number"
+              id="bottom_edge_padding_pt"
+              name="bottom_edge_padding_pt"
+              step="any"
+            />
             <span data-i18n="bottom_margin">Inferior</span>
           </label>
         </div>
@@ -878,8 +911,13 @@
           <label class="field">
             <span class="field-label" data-i18n="sewing_margin">Margem (A)</span>
             <span class="field-unit">
-              <input type="number" id="sewing_marks_margin_pt" name="sewing_marks_margin_pt" />
-              <span>pt</span>
+              <input
+                type="number"
+                id="sewing_marks_margin_pt"
+                name="sewing_marks_margin_pt"
+                step="any"
+              />
+              <span class="unit-label">mm</span>
             </span>
           </label>
           <label class="field">
@@ -893,8 +931,9 @@
                 type="number"
                 id="sewing_marks_tape_width_pt"
                 name="sewing_marks_tape_width_pt"
+                step="any"
               />
-              <span>pt</span>
+              <span class="unit-label">mm</span>
             </span>
           </label>
         </div>
