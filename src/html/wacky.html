@@ -2,17 +2,23 @@
   <summary data-i18n="wacky_small_layouts">Folha única: zines e miniaturas</summary>
   <div class="more-body">
     <p class="callout" data-i18n="wacky_warn">
-      These layouts contain one or more signature per printed page.
+      Cada folha impressa vira um ou mais livrinhos. Valem só as opções de papel, impressão e
+      páginas.
     </p>
 
-    <div class="choices choices-compact" role="radiogroup">
+    <div
+      class="choices choices-compact"
+      role="radiogroup"
+      aria-label="Folha única: zines e miniaturas"
+      data-i18n-tooltip="wacky_small_layouts"
+    >
       <div class="choice-wrap">
         <label class="choice" for="8_zine">
           <input type="radio" id="8_zine" name="sig_format" value="8_zine" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_8_zine">Zine de folha única</span>
             <span class="choice-desc" data-i18n="sig_8_zine_small"
-              >(one sided printed page foldup)</span
+              >8 por face, impressa de um lado só, sem cortes</span
             >
           </span>
         </label>
@@ -35,7 +41,9 @@
           <input type="radio" id="1_3rd" name="sig_format" value="1_3rd" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_1_3rd">Terços</span>
-            <span class="choice-desc" data-i18n="sig_1_3rd_small">(3 folio signature)</span>
+            <span class="choice-desc" data-i18n="sig_1_3rd_small"
+              >6 por face, cadernos de 3 fólios</span
+            >
           </span>
         </label>
         <details class="note">
@@ -50,7 +58,9 @@
           <input type="radio" id="A7_2_16s" name="sig_format" value="A7_2_16s" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a7">Petite</span>
-            <span class="choice-desc" data-i18n="sig_a7_small">(4 folio signature x 2)</span>
+            <span class="choice-desc" data-i18n="sig_a7_small"
+              >16 por face, 2 cadernos de 4 fólios</span
+            >
           </span>
         </label>
         <details class="note">
@@ -66,7 +76,7 @@
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a3">Pequeno</span>
             <span class="choice-desc" data-i18n="sig_a3_small"
-              >(3 folio signature per row x 3)</span
+              >18 por face, 3 linhas de cadernos de 3 fólios</span
             >
           </span>
         </label>
@@ -84,7 +94,9 @@
           <input type="radio" id="a9_3_3_4" name="sig_format" value="a9_3_3_4" />
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a9">Pequenino</span>
-            <span class="choice-desc" data-i18n="sig_a9_small">(3 / 3 / 4 folio signatures)</span>
+            <span class="choice-desc" data-i18n="sig_a9_small"
+              >20 por face, cadernos de 3, 3 e 4 fólios</span
+            >
           </span>
         </label>
         <details class="note">
@@ -100,7 +112,7 @@
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a4">Minúsculo</span>
             <span class="choice-desc" data-i18n="sig_a4_small"
-              >(4 folio signature per row x 4)</span
+              >32 por face, 4 linhas de cadernos de 4 fólios</span
             >
           </span>
         </label>
@@ -119,7 +131,7 @@
           <span class="choice-body">
             <span class="choice-title" data-i18n="sig_a10">Mini</span>
             <span class="choice-desc" data-i18n="sig_a10_small"
-              >(2 / 3 folio signatures per row x 6)</span
+              >60 por face, 6 linhas de cadernos de 2 e 3 fólios</span
             >
           </span>
         </label>
@@ -144,7 +156,12 @@
       </label>
       <div class="field">
         <span class="field-label" data-i18n="wacky_spacing">Distribuição</span>
-        <div class="seg" role="radiogroup">
+        <div
+          class="seg"
+          role="radiogroup"
+          aria-label="Distribuição"
+          data-i18n-tooltip="wacky_spacing"
+        >
           <label
             ><input
               type="radio"

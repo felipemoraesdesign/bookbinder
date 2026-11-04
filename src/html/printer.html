@@ -8,7 +8,7 @@
 
     <div class="field">
       <span class="field-label" data-i18n="printer_type">Impressão</span>
-      <div class="seg" role="radiogroup">
+      <div class="seg" role="radiogroup" aria-label="Impressão" data-i18n-tooltip="printer_type">
         <label
           ><input type="radio" name="printer_type" value="duplex" /><span data-i18n="type_duplex"
             >Frente e verso</span
@@ -20,16 +20,17 @@
           ></label
         >
       </div>
-      <small class="hint" data-i18n="duplex_tooltip">
-        Duplex will alternate front and backs of sheets in a single file.
-      </small>
+      <small class="hint" data-i18n="duplex_tooltip"
+        >Frente e verso gera um arquivo só, alternando frente e verso. Uma face separa frentes e
+        versos em dois arquivos.</small
+      >
     </div>
 
     <details class="more">
       <summary data-i18n="more_paper_options">Mais opções de papel</summary>
       <div class="more-body">
         <label class="field" for="paper_size_unit">
-          <span class="field-label" data-i18n="paper_size_unit">Unidade da lista de papéis</span>
+          <span class="field-label" data-i18n="paper_size_unit">Unidade na lista de papéis</span>
           <select name="paper_size_unit" id="paper_size_unit">
             <option data-i18n="unit_mm" value="mm">Milímetros</option>
             <option data-i18n="unit_pt" value="pt">Pontos</option>
@@ -66,7 +67,7 @@
           <span>
             <span data-i18n="rotate_paper_90">Papel deitado (paisagem)</span>
             <small class="hint" data-i18n="rotate_paper_tooltip"
-              >This puts your paper in 'landscape'.</small
+              >O layout é o mesmo, mas as proporções mudam.</small
             >
           </span>
           <input type="checkbox" class="switch" name="paper_rotation_90" id="paper_rotation_90" />
@@ -76,7 +77,7 @@
           <span>
             <span data-i18n="alternate_page_rotation">Virar pela borda longa</span>
             <small class="hint" data-i18n="alternate_page_rotation_hint"
-              >Alterna a rotação das páginas no verso.</small
+              >Alterna a rotação das páginas entre frente e verso.</small
             >
           </span>
           <input type="checkbox" class="switch" name="rotate_page" />

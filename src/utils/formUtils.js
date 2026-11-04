@@ -84,7 +84,7 @@ export const loadConfiguration = () => {
  * @param { import("../book").Book } book The book to update the form from
  */
 export function updateRenderedForm(book) {
-  book.createpages().then((info) => {
+  return book.createpages().then((info) => {
     updatePageLayoutInfo(info);
     console.log('... pages created');
     renderPageCount(book);

@@ -10,11 +10,13 @@ import {
   handlePreviewClick,
   handleResetSettingsClick,
   handleSewingMarksCheckboxState,
+  refreshPreview,
   renderDownloadNote,
   setLabel,
 } from './utils/clickHandlers.js';
 import {
   paperName,
+  renderCustomSignatureCheck,
   renderInfoBox,
   refreshPageLayoutInfo,
   renderFormFromSettings,
@@ -109,7 +111,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     apply: (settings) => {
       // the page range stays, since it belongs to the PDF on screen
       renderFormFromSettings({ ...settings, pageRange: pageRange.value });
-      handleInputChange(book, bookbinderForm);
+      refreshPreview(book, handleInputChange(book, bookbinderForm));
       renderSetupSummary();
     },
     suggestName: describeSetup,
@@ -124,6 +126,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       printerType: checked('printer_type')?.value,
     });
     renderPresets();
+    renderCustomSignatureCheck(book.neededSheets);
   };
 
   const validatePageRange = () => {
@@ -144,11 +147,15 @@ window.addEventListener('DOMContentLoaded', async () => {
   // add event listeners to grabbed elements
   inputs.forEach((input) => {
     input.addEventListener('change', () => {
-      handleInputChange(book, bookbinderForm);
+      refreshPreview(book, handleInputChange(book, bookbinderForm));
       renderSetupSummary();
     });
   });
   pageRange.addEventListener('input', validatePageRange);
+  // the custom signatures field says at once when it can't be read
+  bookbinderForm.elements.custom_sig.addEventListener('input', () =>
+    renderCustomSignatureCheck(book.neededSheets)
+  );
 
   fileInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
@@ -220,7 +227,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.log('Resetting settings...');
     bookbinderForm.reset();
     handleResetSettingsClick(book);
-    handleInputChange(book, bookbinderForm);
+    refreshPreview(book, handleInputChange(book, bookbinderForm));
     renderSetupSummary();
     validatePageRange();
     setLabel(resetSettings, 'btn_reset_done');

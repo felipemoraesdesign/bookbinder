@@ -21,7 +21,7 @@
     </svg>
     <strong class="dropzone-title" data-i18n="drop_title">Solte seu PDF aqui</strong>
     <span class="dropzone-sub" data-i18n="drop_sub"
-      >Escolha o formato no painel ao lado e baixe a imposição pronta para imprimir.</span
+      >Escolha o formato nas configurações e baixe a imposição pronta para imprimir.</span
     >
     <span class="btn btn-secondary" aria-hidden="true">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -51,7 +51,7 @@
     <h2 class="section-title" id="summary_title" data-i18n="summary_title">
       Seu livro em cadernos
     </h2>
-    <p class="callout callout-warn" id="zine_page_warning" hidden></p>
+    <p class="callout callout-warn" id="summary_warning" hidden></p>
     <figure class="bookblock">
       <div class="bookblock-row" id="sig_visual" aria-hidden="true"></div>
       <figcaption>
@@ -133,6 +133,13 @@
     </div>
   </section>
 
+  <section class="print-guide" id="print_guide" aria-labelledby="print_guide_title" hidden>
+    <h2 class="section-title" id="print_guide_title" data-i18n="print_guide_title">
+      Para imprimir
+    </h2>
+    <ol class="print-steps" id="print_steps"></ol>
+  </section>
+
   <p class="preview-caption" id="preview_caption" hidden></p>
   <iframe
     id="pdf"
@@ -143,6 +150,7 @@
 </div>
 
 <div class="actionbar">
+  <p class="actionbar-summary" id="action_summary" aria-hidden="true"></p>
   <p class="actionbar-note" id="action_note" data-i18n="download_note" aria-live="polite">
     Você recebe um .zip com os arquivos prontos para imprimir.
   </p>

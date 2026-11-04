@@ -5,6 +5,7 @@
 import { PAGE_SIZES } from '../constants';
 import { handleSewingMarksCheckboxState } from './clickHandlers.js';
 import { i18n } from '../i18n.js';
+import { customSignatureError } from './customSignatures.js';
 
 export function renderPageCount(book) {
   const pageCount = document.getElementById('page_count');
@@ -40,11 +41,26 @@ export function renderInfoBox(book) {
   sigCount.parentElement.hidden = !hasSignatures;
   totalPages.parentElement.hidden = isWacky;
 
-  // The single-sheet zine always takes 8 pages: say so when more would be left out
-  const zineWarning = document.getElementById('zine_page_warning');
-  const leftOut = book.format === '8_zine' ? book.pagecount - 8 : 0;
-  zineWarning.hidden = leftOut <= 0;
-  zineWarning.textContent = i18n.t('zine_page_warning', { total: book.pagecount });
+  // Pages that won't print: the single-sheet zine always takes 8, and custom signatures that hold
+  // fewer sheets than the pages fill leave the end of the book out
+  const customCheck = renderCustomSignatureCheck(book.neededSheets);
+  let warning = '';
+  if (book.format === '8_zine' && book.pagecount > 8) {
+    warning = i18n.t('zine_page_warning', { total: book.pagecount });
+  } else if (customCheck?.kind === 'short') {
+    warning = i18n.t('custom_sig_short', customCheck);
+  }
+  const summaryWarning = document.getElementById('summary_warning');
+  summaryWarning.hidden = !warning;
+  summaryWarning.textContent = warning;
+
+  // the figures that matter most, kept in the action bar pinned to the bottom of a phone screen
+  document.getElementById('action_summary').textContent = [
+    `${i18n.t('total_sheets')} ${book.book.sheets}`,
+    hasSignatures && `${i18n.t('num_signatures')} ${book.book.sigconfig.length}`,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   totalSheets.innerText = book.book.sheets;
   sigCount.innerText = book.book.sigconfig.length;
@@ -53,6 +69,31 @@ export function renderInfoBox(book) {
   if (hasSignatures) {
     renderSignatureBlock(document.getElementById('sig_visual'), book.book.sigconfig);
   }
+}
+
+/**
+ * Says under the custom signatures field what it means: a typo, or sheets that leave the end of
+ * the book out (both marked invalid) or add blank pages. Only while custom signatures are chosen.
+ * @param {number} [neededSheets] - sheets the pages fill, once a PDF is laid out
+ * @returns the check, for the summary's warning
+ */
+export function renderCustomSignatureCheck(neededSheets) {
+  const field = document.querySelector('input[name="custom_sig"]');
+  const hint = document.getElementById('custom_sig_hint');
+  const check = document.getElementById('customsig').checked
+    ? customSignatureError(field.value, neededSheets)
+    : null;
+  const invalid = check?.kind === 'syntax' || check?.kind === 'short';
+  field.setAttribute('aria-invalid', invalid);
+  hint.classList.toggle('is-error', invalid);
+  if (check) {
+    hint.removeAttribute('data-i18n');
+    hint.textContent = i18n.t(`custom_sig_${check.kind}`, check);
+  } else {
+    hint.setAttribute('data-i18n', 'custom_sig_tooltip');
+    hint.textContent = i18n.t('custom_sig_tooltip');
+  }
+  return check;
 }
 
 /**
@@ -244,8 +285,9 @@ export function updateAddOrRemoveCustomPaperOption() {
   const width = document.getElementById('paper_size_custom_width').value;
   const height = document.getElementById('paper_size_custom_height').value;
   const paperList = document.getElementById('paper_size');
-  const validDimensions = width.length > 0 && height.length > 0 && !isNaN(width) && !isNaN(height);
-  const customOpt = paperList.children.namedItem('CUSTOM');
+  // a 0 or blank side would lay the pages out as NaN
+  const validDimensions = Number(width) > 0 && Number(height) > 0;
+  const customOpt = paperList.options.namedItem('CUSTOM');
   if (customOpt == null && !validDimensions) {
     // No custom option, no valid custom settings
   } else if (customOpt != null && !validDimensions) {
@@ -257,7 +299,9 @@ export function updateAddOrRemoveCustomPaperOption() {
     opt.setAttribute('value', 'CUSTOM');
     opt.setAttribute('name', 'CUSTOM');
     PAGE_SIZES.CUSTOM = [Number(width), Number(height)];
-    paperList.appendChild(opt);
+    // listed with the common sizes and chosen: typing a size means you want to print on it
+    paperList.querySelector('optgroup').prepend(opt);
+    paperList.value = 'CUSTOM';
   } else {
     // valid option, valid dimensions -- lets just make sure they're up to date
     PAGE_SIZES.CUSTOM = [Number(width), Number(height)];
@@ -274,7 +318,8 @@ export function renderPaperSelectOptions() {
   addGroup('paper_common', COMMON_PAPERS);
   addGroup(
     'paper_other',
-    Object.keys(PAGE_SIZES).filter((key) => !COMMON_PAPERS.includes(key))
+    // 11 × 17 in is Tabloid under another name
+    Object.keys(PAGE_SIZES).filter((key) => !COMMON_PAPERS.includes(key) && key !== '_11X17')
   );
   updatePaperSelectOptionsUnits();
 }
@@ -408,12 +453,21 @@ export function renderFormFromSettings(configuration) {
   });
 }
 
+/**
+ * Loads a URL in the preview frame without adding a step to the browser's history (setting its
+ * src would, so Back would page through old previews), and frees the previous preview's blob.
+ * @param {HTMLIFrameElement} frame
+ * @param {string} url
+ */
+export function showInPreviewFrame(frame, url) {
+  if (frame.dataset.blob) URL.revokeObjectURL(frame.dataset.blob);
+  frame.dataset.blob = url.startsWith('blob:') ? url : '';
+  frame.contentWindow.location.replace(url);
+}
+
 export function clearPreview() {
   const previewFrame = document.getElementById('pdf');
   previewFrame.style.display = 'none';
   document.getElementById('preview_caption').hidden = true;
-  if (previewFrame.src.startsWith('blob:')) {
-    URL.revokeObjectURL(previewFrame.src);
-  }
-  previewFrame.src = '';
+  showInPreviewFrame(previewFrame, 'about:blank');
 }

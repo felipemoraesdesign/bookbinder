@@ -20,6 +20,7 @@ import { calculateDimensions, calculateLayout } from './utils/layout.js';
 import { parsePageRange } from './utils/pageRange.js';
 import { interleavePages, embedPagesInNewPdf } from './utils/pdf.js';
 import { i18n } from './i18n.js';
+import { showInPreviewFrame } from './utils/renderUtils.js';
 import { makesSinglePdf } from './utils/download.js';
 
 // Special layouts name their file after the label the interface shows
@@ -275,6 +276,9 @@ export class Book {
       }
     }
 
+    // the sheets the pages fill, before custom signatures pad with blanks (or leave pages out)
+    this.neededSheets = Math.ceil(this.orderedpages.length / this.per_sheet);
+
     switch (this.format) {
       case 'perfect':
       case 'booklet':
@@ -340,10 +344,11 @@ export class Book {
    *  to generate PDF & populate Previewer
    * @param {boolean} isPreview - if it's true we only generate preview content, if it's not true... we still
    *      generate preview content AND a downloadable zip
+   * @param {{ scroll?: boolean }} [options] - scroll: bring the preview into view (not when it refreshes itself)
    */
-  async createoutputfiles(isPreview) {
+  async createoutputfiles(isPreview, { scroll = true } = {}) {
     const previewPdf = await this.buildOutputs(isPreview);
-    if (previewPdf != null) await this.displayPreview(previewPdf);
+    if (previewPdf != null) await this.displayPreview(previewPdf, scroll);
 
     if (!isPreview) return this.saveDownload();
     else return Promise.resolve(1);
@@ -493,7 +498,7 @@ export class Book {
    * Functionality for displaying on on-page preview nicely.
    * @param {PDFDocument} previewPdf - PDF to display as preview
    */
-  async displayPreview(previewPdf) {
+  async displayPreview(previewPdf, scroll = true) {
     console.log('Attempting to generate preview for ', previewPdf);
     const previewFrame = document.getElementById('pdf');
     // Set before saving, or the viewer shows the blob's id as the title
@@ -508,12 +513,15 @@ export class Book {
     // A blob URL rather than a data URI: Chrome won't load a data URI over ~2 MB in a frame
     const pdfBytes = await previewPdf.save();
 
-    previewFrame.src = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+    showInPreviewFrame(
+      previewFrame,
+      URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }))
+    );
     previewFrame.style.display = '';
     const caption = document.getElementById('preview_caption');
     caption.textContent = this.previewCaption();
     caption.hidden = false;
-    caption.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (scroll) caption.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   /** Says which part of the book the preview shows: only the first signature is imposed for it. */

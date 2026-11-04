@@ -1,7 +1,12 @@
 <details class="panel" id="sig_format" open>
   <summary><span data-i18n="sig_format_title">Encadernação</span></summary>
   <div class="panel-body">
-    <div class="choices" role="radiogroup">
+    <div
+      class="choices"
+      role="radiogroup"
+      aria-label="Encadernação"
+      data-i18n-tooltip="sig_format_title"
+    >
       <label class="choice" for="booklet">
         <input type="radio" id="booklet" name="sig_format" value="booklet" />
         <span class="choice-body">
@@ -17,7 +22,7 @@
         <span class="choice-body">
           <span class="choice-title" data-i18n="standard_sig">Cadernos</span>
           <span class="choice-desc" data-i18n="standard_sig_desc"
-            >Vários cadernos iguais, costurados juntos.</span
+            >Vários cadernos do mesmo tamanho, costurados juntos.</span
           >
           <span class="choice-extra">
             <span class="field-unit">
@@ -39,7 +44,7 @@
         <span class="choice-body">
           <span class="choice-title" data-i18n="custom_sig">Cadernos personalizados</span>
           <span class="choice-desc" data-i18n="custom_sig_desc"
-            >Defina quantas folhas vai em cada caderno.</span
+            >Você define quantas folhas vão em cada caderno.</span
           >
           <span class="choice-extra">
             <input
@@ -49,7 +54,7 @@
               aria-describedby="custom_sig_hint"
             />
             <small class="hint" id="custom_sig_hint" data-i18n="custom_sig_tooltip"
-              >Números separados por vírgula.</small
+              >Folhas por caderno, separadas por vírgula.</small
             >
           </span>
         </span>
@@ -71,8 +76,10 @@
     <details class="note">
       <summary data-i18n="calc_sig_lengths_title">Como contar folhas por caderno</summary>
       <p data-i18n="calc_sig_lengths_p">
-        In this code, the length of a signature is the number of full-sized sheets of paper per
-        signature.
+        O tamanho de um caderno é o número de folhas inteiras de papel que ele leva. No fólio, cada
+        folha tem uma dobra, então você perfura tantas dobras quantas forem as folhas. No quarto,
+        são duas dobras por folha; no oitavo, quatro; no 16º, oito. Calcule o tamanho dos cadernos
+        com isso em mente.
       </p>
     </details>
   </div>

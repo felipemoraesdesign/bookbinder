@@ -10,14 +10,14 @@ import {
 } from './renderUtils';
 
 export function handleInputChange(book, bookbinderForm) {
+  // first, so a newly typed custom size is listed, chosen and in PAGE_SIZES when the form is read
+  updateAddOrRemoveCustomPaperOption();
   const formData = new FormData(bookbinderForm);
   const updatedConfiguration = saveForm(formData);
   book.update(updatedConfiguration);
-  updateAddOrRemoveCustomPaperOption();
   updatePaperSelectOptionsUnits(); // make sure this goes AFTER the Custom update!
-  if (book.inputpdf) {
-    updateRenderedForm(book);
-  }
+  // resolves once the book is laid out again, so a preview can follow the new settings
+  return book.inputpdf ? updateRenderedForm(book) : Promise.resolve();
 }
 
 export function handleFileChange(e, book) {

@@ -56,6 +56,8 @@ function clearActionError() {
  * @param {{ sigFormat: string, printFile: string, printerType: string }} settings
  */
 export function renderDownloadNote(settings) {
+  // a setting changed: the last download and its print steps no longer match
+  document.getElementById('print_guide').hidden = true;
   const note = document.getElementById('action_note');
   note.dataset.downloadKey = makesSinglePdf(settings) ? 'download_note_pdf' : 'download_note';
   if (!note.classList.contains('is-error')) setNote(note, note.dataset.downloadKey);
@@ -80,12 +82,46 @@ export function handleGenerateClick(generateEl, book) {
       const note = document.getElementById('action_note');
       note.removeAttribute('data-i18n');
       note.textContent = i18n.t('download_done', { name: fileName });
+      showPrintGuide(book);
     })
     .catch((error) => {
       console.error(error);
       setIdle(generateEl, 'btn_generate');
       showActionError('generate_error');
     });
+}
+
+/**
+ * After a download, the steps between the file and the bound book for these exact settings: print
+ * at actual size, check the first sheet's back, then fold and gather. Gone once a setting changes.
+ * @param {import('../book').Book} book
+ */
+function showPrintGuide(book) {
+  const folds = Math.log2(book.per_sheet) - 1;
+  const fold = i18n.t(folds === 1 ? 'fold_once' : 'fold_times', { n: folds });
+  const gatherKeys = {
+    standardsig: 'gather_signatures',
+    customsig: 'gather_custom',
+    booklet: 'gather_booklet',
+    perfect: 'gather_perfect',
+  };
+  const steps = [
+    i18n.t('print_actual_size'),
+    i18n.t(book.duplex ? 'print_duplex' : 'print_single'),
+    i18n.t(gatherKeys[book.format] ?? 'gather_single_sheet', {
+      fold,
+      n: book.sigsize,
+      list: (book.signatureconfig ?? []).join(', '),
+    }),
+  ];
+  document
+    .getElementById('print_steps')
+    .replaceChildren(
+      ...steps.map((text) => Object.assign(document.createElement('li'), { textContent: text }))
+    );
+  const guide = document.getElementById('print_guide');
+  guide.hidden = false;
+  guide.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 export function handlePreviewClick(previewEl, book) {
@@ -104,6 +140,33 @@ export function handlePreviewClick(previewEl, book) {
     .finally(() => {
       setIdle(previewEl, 'btn_preview');
     });
+}
+
+let refreshTimer;
+
+/**
+ * Keeps a preview on screen in step with the settings: it dims at once, then is imposed again
+ * once the book is laid out and the changes settle, so it never shows a setup no longer chosen.
+ * @param {import('../book').Book} book
+ * @param {Promise<unknown>} laidOut - resolves when the book reflects the new settings
+ */
+export function refreshPreview(book, laidOut) {
+  const frame = document.getElementById('pdf');
+  if (frame.style.display === 'none') return;
+  frame.classList.add('is-stale');
+  document.getElementById('preview_caption').textContent = i18n.t('preview_updating');
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(async () => {
+    try {
+      await laidOut;
+      // closed meanwhile (a new file was dropped): nothing to keep in step
+      if (frame.style.display !== 'none') await book.createoutputfiles(true, { scroll: false });
+    } catch (error) {
+      console.error(error);
+      clearPreview();
+    }
+    frame.classList.remove('is-stale');
+  }, 300);
 }
 
 export function handleResetSettingsClick(book) {

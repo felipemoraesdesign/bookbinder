@@ -51,9 +51,10 @@ export const clearUrlParams = (url) => {
 };
 
 /**
- * Updates the window location.
+ * Updates the window location in place: settings live in the URL to be shared, not as history
+ * steps, so Back leaves the app instead of changing the address without changing the form.
  * @param { string } url The URL to update the location to
  */
 export const updateWindowLocation = (url) => {
-  window.history.pushState({}, '', url.toString());
+  window.history.replaceState({}, '', url.toString());
 };
