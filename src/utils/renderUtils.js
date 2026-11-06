@@ -309,10 +309,13 @@ export function paperName(key) {
   const translated = i18n.t(`paper_${key}`);
   if (translated !== `paper_${key}`) return translated;
   const words = key.replace(/^_/, '').split('_');
-  // short words and words with digits are codes (A4, JIS, ARCH, B10); longer ones are names
+  // short words, words with digits and a few acronyms are codes (A4, JIS, ARCH, B10); the rest
+  // are names, DEMY included
   return words
     .map((word, i) => {
-      if (word.length <= 4 || /\d/.test(word)) return word;
+      if (word.length <= 3 || /\d/.test(word) || ['ARCH', 'FLSA', 'FLSE'].includes(word)) {
+        return word;
+      }
       return i === 0 ? word[0] + word.slice(1).toLowerCase() : word.toLowerCase();
     })
     .join(' ');
@@ -387,11 +390,25 @@ export function renderPaperSelectOptions() {
     group.append(...keys.map((key) => new Option(key, key, key === 'A4', key === 'A4')));
     paperList.append(group);
   };
+  // 11 × 17 in is Tabloid under another name
+  const rest = Object.keys(PAGE_SIZES).filter(
+    (key) => !COMMON_PAPERS.includes(key) && key !== '_11X17' && key !== 'CUSTOM'
+  );
+  const take = (test) => rest.filter(test);
+  const groups = [
+    ['paper_iso_a', take((k) => /^A\d+$/.test(k))],
+    ['paper_iso_b', take((k) => /^B\d+$/.test(k) || k === 'SRA3')],
+    ['paper_jis', take((k) => k.startsWith('JIS_'))],
+    ['paper_books', take((k) => /QUARTO|OCTAVO|PAPERBACK/.test(k))],
+    ['paper_cards', take((k) => k.startsWith('ID_') || k === 'POSTCARD')],
+  ];
+  const grouped = groups.flatMap(([, keys]) => keys);
   addGroup('paper_common', COMMON_PAPERS);
+  groups.forEach(([label, keys]) => addGroup(label, keys));
+  // US sizes and anything a new library version adds
   addGroup(
-    'paper_other',
-    // 11 × 17 in is Tabloid under another name
-    Object.keys(PAGE_SIZES).filter((key) => !COMMON_PAPERS.includes(key) && key !== '_11X17')
+    'paper_us',
+    rest.filter((key) => !grouped.includes(key))
   );
   updatePaperSelectOptionsUnits();
 }

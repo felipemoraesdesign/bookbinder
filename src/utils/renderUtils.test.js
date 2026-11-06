@@ -32,6 +32,7 @@ describe('paperName', () => {
     expect(paperName('JIS_B5')).toBe('JIS B5');
     expect(paperName('ARCH_E')).toBe('ARCH E');
     expect(paperName('CROWN_QUARTO')).toBe('Crown quarto');
+    expect(paperName('DEMY_OCTAVO')).toBe('Demy octavo');
     expect(paperName('PENGUIN_LARGE_PAPERBACK')).toBe('Penguin large paperback');
   });
 
